@@ -29,6 +29,7 @@ public class Main {
 		Timer hc;
 		Timer oc;
 		Timer oa;
+		Timer ab;
 		
 		while(!beaconFound){
 			lf.findLightSourceHeading();
