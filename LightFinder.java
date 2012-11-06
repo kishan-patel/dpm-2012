@@ -130,6 +130,7 @@ public class LightFinder implements TimerListener {
 		}
 	}
 	
+	
 	/**
 	 * This method is called once a light source is located and causes the robot to travel towards it.
 	 * While traveling towards the light source, it periodically attempts to correct the heading

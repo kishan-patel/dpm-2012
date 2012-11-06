@@ -88,23 +88,19 @@ public class Navigation {
 		odo.getPosition(currPos);
 		angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		
-		//Turn until the current heading is within a tolerance of the wanted angle.
-		if(Math.abs(angleDiff)>ROTATION_TOLERANCE){
-			while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
-				odo.getPosition(currPos);
-				angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
-				if(angleDiff<0){
-					//Turn counter clockwise.
-					robot.setRotationSpeed(-ROTATION_SPEED);
-				}else{
-					//Turn clockwise.
-					robot.setRotationSpeed(ROTATION_SPEED);	
-				}
-			}
-			
+		if(angleDiff<0){
+			robot.setRotationSpeed(-ROTATION_SPEED);
+			robot.setRotationSpeed(-ROTATION_SPEED);
+		}else{
+			robot.setRotationSpeed(ROTATION_SPEED);	
+			robot.setRotationSpeed(ROTATION_SPEED);	
+		}
+		while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
+			odo.getPosition(currPos);
+			angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
+		}
 			//Stop the rotation.
 			robot.setRotationSpeed(0.0);
-		}
 	}
 	
 	/**

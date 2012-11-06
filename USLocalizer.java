@@ -52,27 +52,37 @@ public class USLocalizer {
 		
 		if (locType == LocalizationType.FALLING_EDGE) {
 			// rotate the robot until it sees no wall
-			robot.setRotationSpeed(ROTATION_SPEED);
-			while(getFilteredData() <= WALL_DIST||noObjDetectCount<5);
+			while(getFilteredData() <= WALL_DIST||noObjDetectCount<5){
+				robot.setRotationSpeed(ROTATION_SPEED);
+			}
 			
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
-			while(getFilteredData()>(WALL_DIST + NOISE)||objDetectCount<5);
+			while(getFilteredData()>(WALL_DIST + NOISE)||objDetectCount<5){
+				robot.setRotationSpeed(ROTATION_SPEED);
+			}
 			odo.getPosition(noisePos);	
-			while(getFilteredData()>=WALL_DIST - NOISE||objDetectCount<5)
+			while(getFilteredData()>=WALL_DIST - NOISE||objDetectCount<5){
+				robot.setRotationSpeed(ROTATION_SPEED);
+			}
 			Sound.beep();
 			odo.getPosition(pos);
 			angleA = (pos[2]+noisePos[2])/2;
 			
 			// switch direction and wait until it sees no wall
-			robot.setRotationSpeed(-ROTATION_SPEED);
-			while(getFilteredData()<WALL_DIST||noObjDetectCount<5);
+			while(getFilteredData()<WALL_DIST||noObjDetectCount<5){
+				robot.setRotationSpeed(-ROTATION_SPEED);
+			}
 			
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
-			while(getFilteredData()>WALL_DIST+NOISE||objDetectCount<5);
+			while(getFilteredData()>WALL_DIST+NOISE||objDetectCount<5){
+				robot.setRotationSpeed(-ROTATION_SPEED);
+			}
 			odo.getPosition(noisePos);
-			while(getFilteredData()>=WALL_DIST-NOISE||objDetectCount<5);
+			while(getFilteredData()>=WALL_DIST-NOISE||objDetectCount<5){
+				robot.setRotationSpeed(-ROTATION_SPEED);
+			}
 			Sound.beep();
 			odo.getPosition(pos);
 			angleB = (pos[2]+noisePos[2])/2;
@@ -80,9 +90,9 @@ public class USLocalizer {
 			// angleA is clockwise from angleB, so assume the average of the
 			// angles to the right of angleB is 45 degrees past 'north'
 			if ( angleA > angleB){ 
-				angle = 50 - (angleA+angleB)/2;
+				angle = 45 - (angleA+angleB)/2;
 			}else{
-				angle = 224 - (angleA+angleB)/2;
+				angle = 228 - (angleA+angleB)/2;
 			}
 			
 			odo.setPosition(new double [] {0.0, 0.0, angleB+angle}, new boolean [] {true, true, true});
