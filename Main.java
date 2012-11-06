@@ -29,6 +29,7 @@ public class Main {
 					USLocalizer.LocalizationType.FALLING_EDGE);
 			//LightFinder lf = new LightFinder(odo, us, ls);
 			usl.doLocalization();
+		Timer ab;
 		}
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
