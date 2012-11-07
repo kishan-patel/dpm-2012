@@ -10,35 +10,36 @@ public class Claw {
 	private final int pulleySpeed = 100;
 	private final int clawSpeed = 10;
 	private final int noOfRotsPulley = (int) (360*pulleyHeight/(2*Math.PI*pulleyMotorRadius));
-	private final int noOfRotsClaw = 120	;
+	private final int noOfRotsClaw = 80;
 	private NXTRegulatedMotor clawMotor = Motor.B;
 	private NXTRegulatedMotor pulleyMotor = Motor.A;
+	final static int stop = 0;
 
-	private boolean down = true;
-	private boolean open = true;
+	private boolean down = false;
+	private boolean open = false;
 	
 	public void closeClaw(){
 		clawMotor.setSpeed(clawSpeed);
-		clawMotor.rotate(noOfRotsClaw);
-		clawMotor.setSpeed(0);
+		clawMotor.rotate(noOfRotsClaw + 10);
+		clawMotor.setSpeed(stop);
 	}
 	
 	public void openClaw(){
 		clawMotor.setSpeed(clawSpeed);
 		clawMotor.rotate(-noOfRotsClaw);
-		clawMotor.setSpeed(0);
+		clawMotor.setSpeed(stop);
 	}
 	
 	public void moveClawUp(){
 		pulleyMotor.setSpeed(pulleySpeed);
 		pulleyMotor.rotate(noOfRotsPulley);
-		pulleyMotor.setSpeed(0);
+		pulleyMotor.setSpeed(stop);
 	}
 	
 	public void moveClawDown(){
 		pulleyMotor.setSpeed(pulleySpeed);
 		pulleyMotor.rotate(-noOfRotsPulley);
-		pulleyMotor.setSpeed(0);
+		pulleyMotor.setSpeed(stop);
 	}
 
 	
@@ -48,9 +49,10 @@ public class Claw {
 		
 		LCD.clear();
 		LCD.drawString("Left: Move up/down",0,0);
-		LCD.drawString("Right: Move up/down",0,1);
+		LCD.drawString("Right: Close or Open",0,1);
 		do{
 			buttonChoice = Button.waitForAnyPress();
+			// Pulling the claw up or down
 			if(buttonChoice==Button.ID_LEFT){
 				if(claw.down){
 					claw.moveClawUp();
@@ -59,10 +61,11 @@ public class Claw {
 					claw.moveClawDown();
 					claw.down = true;
 				}
+			// Setting the claw close or open
 			}else if(buttonChoice == Button.ID_RIGHT){
 				if(claw.open){
 					claw.closeClaw();
-					claw.open = false;
+					claw.open = false;					
 				}else{
 					claw.openClaw();
 					claw.open = true;
