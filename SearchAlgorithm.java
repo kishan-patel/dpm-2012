@@ -1,5 +1,5 @@
 
-public class SearchAlgo {
+public class SearchAlgorithm {
 
 	public void navigateToNextCoordinate(){
 		
