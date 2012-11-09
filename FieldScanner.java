@@ -4,7 +4,7 @@ import lejos.nxt.UltrasonicSensor;
 import lejos.nxt.comm.RConsole;
 import lejos.util.Timer;
 import lejos.util.TimerListener;
-public class LightFinder implements TimerListener {
+public class FieldScanner implements TimerListener {
 	/**This number specifies how frequently correction should be done while traveling towards the light source.*/
 	private final static int UPDATE_HEADING_PERIOD = 3000;
 	/**This number represents the intensity of the light source.*/
@@ -58,7 +58,7 @@ public class LightFinder implements TimerListener {
 	/**
 	 * Constructor 
 	 */
-	public LightFinder(Odometer odo, UltrasonicSensor us, LightSensor ls) {
+	public FieldScanner(Odometer odo, UltrasonicSensor us, LightSensor ls) {
 		this.us = us;
 		this.ls = ls;
 		this.odo = odo;
