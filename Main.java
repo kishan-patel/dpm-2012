@@ -30,6 +30,18 @@ public class Main {
 			//LightFinder lf = new LightFinder(odo, us, ls);
 			usl.doLocalization();
 		Timer ab;
+		}else if (buttonChoice == Button.ID_LEFT){
+			USSensor usSensor = SensorAndMotorInfo.getUsSensor();
+			LightSensor leftLS = SensorAndMotorInfo.getLeftLightSensor();
+			LightSensor rightLS = SensorAndMotorInfo.getRightLightSensor();
+			TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);
+			Odometer odo = new Odometer(patBot,true);
+			LCDInfo lcd = new LCDInfo(odo);
+			USLocalizer usl = new USLocalizer(odo, usSensor,
+					USLocalizer.LocalizationType.FALLING_EDGE);
+			usl.doLocalization();
+			Navigation nav = Navigation.getNavigation(odo);
+			nav.moveToTile(0, 0);
 		}
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);

@@ -8,7 +8,22 @@ import lejos.util.TimerListener;
 public class FieldScanner implements TimerListener {
 	/** This number represents the intensity of the light source. */
 	private final static int MIN_LIGHT_INTENSITY = 40;
-
+	
+	/**The tolerance allowed in the angle reading*/
+	private final int ANGLE_TOLERANCE = 2;
+	
+	/**Constant to represent the status of a tile.*/
+	private final int UNKNOWN = 0;
+	
+	/**Constant to represent the status of a tile.*/
+	private final int EMPTY = 1;
+	
+	/**Constant to represent the status of a tile*/
+	private final int OBSTACLE = 2;
+	
+	/**Constant to represent the status of a tile*/
+	private final int BEACON = 3;
+	
 	/**
 	 * An instance of an odometer class. It's used to get the robot's odometry
 	 * information.
@@ -43,6 +58,18 @@ public class FieldScanner implements TimerListener {
 	private double[] pos = new double[3];
 
 	/**
+	 * Contains information about the tiles in the field. A status of a tile can be unexplored,
+	 * empty, obstacle, or beacon.
+	 */
+	private static int[][] fieldInfo = new int[20][20];
+	
+	/**Ensures only one instance of this class is created*/
+	private static FieldScanner fieldScanner = null;
+	
+	/**Stores the x and y positions of the current tile.*/
+	private  int[] currentTile = new int[2];
+	
+	/**
 	 * This method is periodically called when the robot is rotating 360
 	 * degrees. It stores the angle at which the maximum light reading occurs
 	 * while the rotation is done.
@@ -62,7 +89,7 @@ public class FieldScanner implements TimerListener {
 	/**
 	 * Constructor
 	 */
-	public FieldScanner(Odometer odo) {
+	private FieldScanner(Odometer odo) {
 		this.us = SensorAndMotorInfo.getUsSensor();
 		this.ls = SensorAndMotorInfo.getLeftLightSensor();
 		this.odo = odo;
@@ -70,6 +97,14 @@ public class FieldScanner implements TimerListener {
 		ls.setFloodlight(false);
 	}
 
+	public static FieldScanner getFieldScanner(Odometer odo){
+		if(fieldScanner==null){
+			fieldScanner = new FieldScanner(odo);
+		}
+		
+		return fieldScanner;
+	}
+	
 	/**
 	 * This method is called when the timer restarts (i.e. when the robot
 	 * commences to do a 360 degree rotation to locate the light source).
@@ -101,20 +136,41 @@ public class FieldScanner implements TimerListener {
 		timer.stop();
 	}
 
-	/**
-	 * The goal of this method is to locate the light source. It accomplishes
-	 * this by doing a rotation of 360 degrees and turning towards the light
-	 * source if it is found.
-	 */
-	public void findLightSourceHeading() {
-		reset();
-		Timer timer = new Timer(10, this);
-		timer.start();
-		nav.turn360();
-		timer.stop();
-		if (maxLightReading > MIN_LIGHT_INTENSITY) {
-			nav.turnTo(angleOfMaxLightReading);
+	public void markObstacle(int distanceToObstacle){
+		double[] pos = new double[3];
+		odo.getPosition(pos);
+		double currentXDist = pos[0];
+		double currentYDist = pos[1];
+		double currentTheta = pos[2];
+		int[] tiles;
+		
+		if(Math.abs(Odometer.minimumAngleFromTo(currentTheta, 0))<=ANGLE_TOLERANCE){
+			//Obstacle is in +ve y direction.
+			tiles = nav.convertDistancesToTiles(currentXDist, currentYDist+distanceToObstacle);
+		}else if (Math.abs(Odometer.minimumAngleFromTo(currentTheta, 90))<=ANGLE_TOLERANCE){
+			//Obstacle is in +ve x direction.
+			tiles = nav.convertDistancesToTiles(currentXDist+distanceToObstacle, currentYDist);
+		}else if (Math.abs(Odometer.minimumAngleFromTo(currentTheta, 270))<=ANGLE_TOLERANCE){
+			//Obstacle is in -ve y direction.
+			tiles = nav.convertDistancesToTiles(currentXDist, currentYDist-distanceToObstacle);
+		}else{
+			//Obstacle is in -ve x direction.
+			tiles = nav.convertDistancesToTiles(currentXDist-distanceToObstacle, currentYDist);
 		}
+		
+		fieldInfo[tiles[0]][tiles[1]] = OBSTACLE;
 	}
-
+	
+	public int[] getCurrentTile(){
+		return currentTile;
+	}
+	
+	public void setCurrentTile(int xCurrentTile, int yCurrentTile){
+		currentTile[0] = xCurrentTile;
+		currentTile[1] = yCurrentTile;
+	}
+	
+	public static int[][] getFieldInfo(){
+		return fieldInfo;
+	}
 }

@@ -18,7 +18,7 @@ public class Navigation {
 	
 	/**The forward speed.*/
 	private static double FORWARD_SPEED = 15;
-	
+		
 	/**An array which holds the odometry information for the robot at a given point in time.*/
 	private double[] position = new double[3];
 	
@@ -34,8 +34,12 @@ public class Navigation {
 	/**US sensor used to avoid obstacles*/
 	private USSensor usSensor;
 	
+	/**Holds information about the tiles in the field.*/
+	private FieldScanner fieldScanner;
+	
 	/**To prevent multiple instances of this class being created*/
 	private static Navigation navigation = null;
+	
 	
 	/**
 	 * Constructor
@@ -45,6 +49,7 @@ public class Navigation {
 		this.robot = odo.getTwoWheeledRobot();
 		this.searchAlgorithm = new SearchAlgorithm();
 		this.usSensor = SensorAndMotorInfo.getUsSensor();
+		this.fieldScanner = FieldScanner.getFieldScanner(odo);
 	}
 	
 	public static Navigation getNavigation(Odometer odo){
@@ -70,31 +75,32 @@ public class Navigation {
 		robot.setForwardSpeed(0.0);
 	}
 	
-	public void moveToTile(int xTile, int yTile){
-		int[]destTiles = searchAlgorithm.getNextXYTile();
-		int nextXTile = destTiles[0];
-		int nextYTile = destTiles[1];
-		double distX = nextXTile*(TILE_DIM+HALF_TILE_DIM);
-		double distY = nextYTile*(TILE_DIM+HALF_TILE_DIM);
+	public void moveToTile(int xDestTile, int yDestTile){
+		int[]currentTile, destTiles;
+		int nextXTile, nextYTile, distanceToObstacle;
+		double distX, distY;
 		boolean isObstacleInTheWay = false;
 		
 		do{
-			destTiles = searchAlgorithm.getNextXYTile();
+			currentTile = fieldScanner.getCurrentTile();
+			destTiles = searchAlgorithm.getNextXYTile(currentTile[0],xDestTile,currentTile[1],yDestTile);
 			nextXTile = destTiles[0];
 			nextYTile = destTiles[1];
 			distX = nextXTile*(TILE_DIM+HALF_TILE_DIM);
 			distY = nextYTile*(TILE_DIM+HALF_TILE_DIM);
 			isObstacleInTheWay = isObstacleInTheWay(distX,distY);
 			if(isObstacleInTheWay){
-				//TODO - Mark obstacle
+				distanceToObstacle = usSensor.getFilteredDistance();
+				fieldScanner.markObstacle(distanceToObstacle);
 			}else{
 				travelTo(distX,distY);
+				fieldScanner.setCurrentTile(nextXTile, nextYTile);
 			}
-		}while(Math.abs(odo.getXPos()-distX)>DISTANCE_ERROR||(Math.abs(odo.getYPos()-distY)>DISTANCE_ERROR));
+		}while((xDestTile-nextXTile)!=0||(yDestTile-nextYTile)!=0);
 	}
 	
 	public boolean isObstacleInTheWay(double x, double y){
-		double distX =0;
+		double distX=0;
 		double distY=0;
 		double theta=0;
 		
@@ -110,14 +116,45 @@ public class Navigation {
 			turnTo(theta);
 		}
 		
-		if(usSensor.getFilteredDistance()<Math.abs(distX)||usSensor.getFilteredDistance()<Math.abs(distY)){
-			return false;
+		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=ROTATION_TOLERANCE){
+			//Obstacle may be in +ve y direction.
+			if(Math.abs(odo.getYPos()-distY)>DISTANCE_ERROR){
+				return true;
+			}
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=ROTATION_TOLERANCE){
+			//Obstacle may be in +ve x direction.
+			if(Math.abs(odo.getXPos()-distX)>DISTANCE_ERROR){
+				return true;
+			}
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 270))<=ROTATION_TOLERANCE){
+			//Obstacle may be in -ve y direction.
+			if(Math.abs(odo.getYPos()-distY)>DISTANCE_ERROR){
+				return true;
+			}
 		}else{
-			return true;
+			//Obstacle may be in -ve x direction.
+			if(Math.abs(odo.getXPos()-distX)>DISTANCE_ERROR){
+				return true;
+			}
 		}
+		
+		return false;
+		
 	}
 	
+	public double[] convertTilesToDistances(int xTile, int yTile){
+		double[] distances = new double[2];
+		distances[0] = xTile*(TILE_DIM+HALF_TILE_DIM);
+		distances[1] = yTile*(TILE_DIM+HALF_TILE_DIM);
+		return distances;
+	}
 	
+	public int[] convertDistancesToTiles(double xDist, double yDist){
+		int[] tiles = new int[2];
+		tiles[0] = (int)(xDist/(TILE_DIM+HALF_TILE_DIM));
+		tiles[1] = (int)(yDist/(TILE_DIM+HALF_TILE_DIM));
+		return tiles;
+	}
 	
 	/**	
 	 * Travels to the (x,y) coordinate. Updates heading first if necessary.
