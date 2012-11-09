@@ -3,25 +3,56 @@
 public class Navigation {
 	/**The allowed tolerance in the angle while rotating.*/
 	private final static double ROTATION_TOLERANCE = 0.5;
+	
 	/**The allowed tolerance in the distance to a particular point.*/
 	private final double DISTANCE_ERROR = 2;
+	
+	/**Dimension of a tile*/
+	private final double TILE_DIM = 30.48;
+	
+	/**Dimension of half a tile*/
+	private final double HALF_TILE_DIM = 15.24;
+	
 	/**The rotation speed.*/
 	private int ROTATION_SPEED = 15;
+	
 	/**The forward speed.*/
 	private static double FORWARD_SPEED = 15;
+	
 	/**An array which holds the odometry information for the robot at a given point in time.*/
 	private double[] position = new double[3];
+	
 	/**An instance of an odometer class. It's used to get the robot's odometry information.*/
 	private Odometer odo;
+	
 	/**Used to set the speeds of he robot.*/
 	private TwoWheeledRobot robot;
+	
+	/**The search algorithm is used to get the tiles to move to to reach the destination*/
+	private SearchAlgorithm searchAlgorithm;
+	
+	/**US sensor used to avoid obstacles*/
+	private USSensor usSensor;
+	
+	/**To prevent multiple instances of this class being created*/
+	private static Navigation navigation = null;
 	
 	/**
 	 * Constructor
 	 */
-	public Navigation(Odometer odo) {
+	private Navigation(Odometer odo) {
 		this.odo = odo;
 		this.robot = odo.getTwoWheeledRobot();
+		this.searchAlgorithm = new SearchAlgorithm();
+		this.usSensor = SensorAndMotorInfo.getUsSensor();
+	}
+	
+	public static Navigation getNavigation(Odometer odo){
+		if(navigation == null){
+			navigation = new Navigation(odo);
+		}
+		
+		return navigation;
 	}
 	
 	/**
@@ -39,7 +70,56 @@ public class Navigation {
 		robot.setForwardSpeed(0.0);
 	}
 	
-	/**
+	public void moveToTile(int xTile, int yTile){
+		int[]destTiles = searchAlgorithm.getNextXYTile();
+		int nextXTile = destTiles[0];
+		int nextYTile = destTiles[1];
+		double distX = nextXTile*(TILE_DIM+HALF_TILE_DIM);
+		double distY = nextYTile*(TILE_DIM+HALF_TILE_DIM);
+		boolean isObstacleInTheWay = false;
+		
+		do{
+			destTiles = searchAlgorithm.getNextXYTile();
+			nextXTile = destTiles[0];
+			nextYTile = destTiles[1];
+			distX = nextXTile*(TILE_DIM+HALF_TILE_DIM);
+			distY = nextYTile*(TILE_DIM+HALF_TILE_DIM);
+			isObstacleInTheWay = isObstacleInTheWay(distX,distY);
+			if(isObstacleInTheWay){
+				//TODO - Mark obstacle
+			}else{
+				travelTo(distX,distY);
+			}
+		}while(Math.abs(odo.getXPos()-distX)>DISTANCE_ERROR||(Math.abs(odo.getYPos()-distY)>DISTANCE_ERROR));
+	}
+	
+	public boolean isObstacleInTheWay(double x, double y){
+		double distX =0;
+		double distY=0;
+		double theta=0;
+		
+		odo.getPosition(position);
+		distX = x - position[0];
+		distY = y - position[1];
+		theta = (Math.toDegrees(Math.atan2(distX,distY)));
+		theta=(theta<=0)?theta+=360:theta;
+		
+		//Update the heading of the robot to point to the direction of the 
+		//final coordinates.
+		if(Math.abs(theta-position[2])>ROTATION_TOLERANCE){
+			turnTo(theta);
+		}
+		
+		if(usSensor.getFilteredDistance()<Math.abs(distX)||usSensor.getFilteredDistance()<Math.abs(distY)){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	
+	
+	
+	/**	
 	 * Travels to the (x,y) coordinate. Updates heading first if necessary.
 	 * @param x The destination x coordinate.
 	 * @param y The destination y coordinate.

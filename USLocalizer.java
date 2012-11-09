@@ -37,7 +37,7 @@ public class USLocalizer {
 		this.robot = odo.getTwoWheeledRobot();
 		this.us = us;
 		this.locType = locType;
-		this.nav = new Navigation(odo);
+		this.nav = Navigation.getNavigation(odo);
 		// switch off the ultrasonic sensor
 		//us.off();
 	}

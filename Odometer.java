@@ -65,6 +65,24 @@ public class Odometer implements TimerListener {
 		}
 	}
 	
+	public double getXPos(){
+		synchronized (lock) {
+			return x;
+		}
+	}
+	
+	public double getYPos(){
+		synchronized (lock) {
+			return y;
+		}
+	}
+	
+	public double getTheta(){
+		synchronized (lock) {
+			return theta;
+		}
+	}
+	
 	public TwoWheeledRobot getTwoWheeledRobot() {
 		return robot;
 	}
