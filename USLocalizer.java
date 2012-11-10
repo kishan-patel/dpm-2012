@@ -11,7 +11,7 @@ public class USLocalizer {
 	/**Value used for the rising_edge.*/
 	public static int TRESH_HOLD = 7;
 	/**Specifies the distance to the wall the confirms it has been detected.*/
-	public static int WALL_DIST = 40;
+	public static int WALL_DIST = 60;
 	/**The noise margin.*/
 	public static int NOISE = 1;
 	/**Used to control the forward motion and rotation of the robot.*/
@@ -50,57 +50,66 @@ public class USLocalizer {
 		double [] pos = new double [3];
 		double [] noisePos = new double [3];
 		double angleA, angleB,angle;
-		
+		int distance;
 		if (locType == LocalizationType.FALLING_EDGE) {
 			// rotate the robot until it sees no wall
-			while(getFilteredData() <= WALL_DIST||noObjDetectCount<5){
-				RConsole.println(""+us.getFilteredDistance());
+			while((distance=getFilteredData()) <= WALL_DIST||noObjDetectCount<10){
+				RConsole.println(""+distance);
+				RConsole.println("no obj. detect count: "+noObjDetectCount);
 				robot.setRotationSpeed(ROTATION_SPEED);
 			}
 			RConsole.println("Robot sees no wall");
+			
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
-			while(getFilteredData()>WALL_DIST + NOISE||objDetectCount<5){
-				RConsole.println(""+us.getFilteredDistance());
+			while((distance=getFilteredData())>WALL_DIST + NOISE||objDetectCount<10){
+				RConsole.println(""+distance);
+				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(ROTATION_SPEED);
 			}
 			odo.getPosition(noisePos);	
-			while(getFilteredData()>=WALL_DIST - NOISE||objDetectCount<5){
-				RConsole.println(""+us.getFilteredDistance());
+			while((distance=getFilteredData())>=WALL_DIST - NOISE||objDetectCount<10){
+				RConsole.println(""+distance);
+				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(ROTATION_SPEED);
 			}
 			Sound.beep();
 			odo.getPosition(pos);
 			angleA = (pos[2]+noisePos[2])/2;
-			RConsole.println("Moving till robot sees no wall");
+			RConsole.println("Robot saw a wall withing the noise margin");
+			
 			// switch direction and wait until it sees no wall
-			while(getFilteredData()<WALL_DIST||noObjDetectCount<5){
-				RConsole.println(""+us.getFilteredDistance());
+			while((distance=getFilteredData())<WALL_DIST||noObjDetectCount<10){
+				RConsole.println(""+distance);
+				RConsole.println("no obj. detect count: "+noObjDetectCount);
 				robot.setRotationSpeed(-ROTATION_SPEED);
 			}
+			RConsole.println("Robot sees no wall");
 			
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
-			while(getFilteredData()>WALL_DIST+NOISE||objDetectCount<5){
-				RConsole.println(""+us.getFilteredDistance());
+			while((distance=getFilteredData())>WALL_DIST+NOISE||objDetectCount<10){
+				RConsole.println(""+distance);
+				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(-ROTATION_SPEED);
 			}
 			odo.getPosition(noisePos);
-			while(getFilteredData()>=WALL_DIST-NOISE||objDetectCount<5){
-				RConsole.println(""+us.getFilteredDistance());
+			while((distance=getFilteredData())>=WALL_DIST-NOISE||objDetectCount<10){
+				RConsole.println(""+distance);
+				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(-ROTATION_SPEED);
 			}
-			RConsole.println("Robot saw a wall");
 			Sound.beep();
 			odo.getPosition(pos);
 			angleB = (pos[2]+noisePos[2])/2;
+			RConsole.println("Robot saw a wall within the noise margin");
 			
 			// angleA is clockwise from angleB, so assume the average of the
 			// angles to the right of angleB is 45 degrees past 'north'
 			if ( angleA > angleB){ 
 				angle = 45 - (angleA+angleB)/2;
 			}else{
-				angle = 228 - (angleA+angleB)/2;
+				angle = 223 - (angleA+angleB)/2;
 			}
 			
 			odo.setPosition(new double [] {0.0, 0.0, angleB+angle}, new boolean [] {true, true, true});
@@ -168,6 +177,7 @@ public class USLocalizer {
 	private int getFilteredData() {
 		int distance;
 		distance = us.getDistance();
+		try{Thread.sleep(10);}catch(InterruptedException e){}
 		if(distance > WALL_DIST){
 			noObjDetectCount++;
 			objDetectCount = 0;

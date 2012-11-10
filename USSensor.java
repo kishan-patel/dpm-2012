@@ -21,6 +21,7 @@ public class USSensor extends UltrasonicSensor{
 			filterControl = 0;
 			distance = currentDistance;
 		}
+		
 		return distance;
 	}
 }
