@@ -4,13 +4,14 @@ import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
+import lejos.nxt.comm.RConsole;
 import lejos.util.Timer;
-import lejos.util.TimerListener;
 
 
 public class Main {
 
 	public static void main(String[] args){
+		RConsole.openBluetooth(2000);
 		int buttonChoice;
 		LCD.clear();
 		do{
@@ -20,7 +21,7 @@ public class Main {
 
 		
 		if(buttonChoice == Button.ID_LEFT){
-			UltrasonicSensor us = new UltrasonicSensor(SensorPort.S1);
+			USSensor us = new USSensor(SensorPort.S1);
 			LightSensor ls = new LightSensor(SensorPort.S3);
 			TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);
 			Odometer odo = new Odometer(patBot, true);
@@ -30,21 +31,26 @@ public class Main {
 			//LightFinder lf = new LightFinder(odo, us, ls);
 			usl.doLocalization();
 		Timer ab;
-		}else if (buttonChoice == Button.ID_LEFT){
+		}else if (buttonChoice == Button.ID_RIGHT){
 			USSensor usSensor = SensorAndMotorInfo.getUsSensor();
-			LightSensor leftLS = SensorAndMotorInfo.getLeftLightSensor();
-			LightSensor rightLS = SensorAndMotorInfo.getRightLightSensor();
+			//LightSensor leftLS = SensorAndMotorInfo.getLeftLightSensor();
+			//LightSensor rightLS = SensorAndMotorInfo.getRightLightSensor();
 			TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);
+			RConsole.println("Got two wheeled robot");
 			Odometer odo = new Odometer(patBot,true);
+			RConsole.println("Got odo");
 			LCDInfo lcd = new LCDInfo(odo);
+			RConsole.println("Got lcd");
 			USLocalizer usl = new USLocalizer(odo, usSensor,
 					USLocalizer.LocalizationType.FALLING_EDGE);
+			RConsole.println("Created usl object");
 			usl.doLocalization();
-			Navigation nav = Navigation.getNavigation(odo);
-			nav.moveToTile(0, 0);
+			//Navigation nav = Navigation.getNavigation(odo);
+			//nav.moveToTile(0, 0);
 		}
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
+	
 		
 	}
 }

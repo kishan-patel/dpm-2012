@@ -2,27 +2,25 @@ import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
 
 public class USSensor extends UltrasonicSensor{
+	private final int FILTER_OUT = 20;
+	int filterControl = 0;
+	int distance = 0;
+	
 	public USSensor(SensorPort sp){
 		super(sp);
 	}
 	
 	public int getFilteredDistance(){
-		int distance = 0;
-		int countOf255=0;
-		for(int i=0;i<10;){
-			distance += getDistance();
-			if(distance==225 && countOf255<5){
-				countOf255++;
-			}else if(distance==255 && countOf255>5){
-				countOf255++;
-				i++;
-				distance += getDistance();
-			}else{
-				countOf255=0;
-				i++;
-				distance += getDistance();
-			}
+		int currentDistance = getDistance();
+		if (currentDistance == 255 && filterControl < FILTER_OUT) {
+			// bad value, do not set the distance var, however do increment the
+			// filter value
+			filterControl++;
+		}  else {
+			// distance went below 50, therefore reset everything.
+			filterControl = 0;
+			distance = currentDistance;
 		}
-		return distance/10;
+		return distance;
 	}
 }

@@ -1,3 +1,5 @@
+import lejos.nxt.comm.RConsole;
+
 
 
 public class Navigation {
@@ -37,9 +39,7 @@ public class Navigation {
 	/**Holds information about the tiles in the field.*/
 	private FieldScanner fieldScanner;
 	
-	/**To prevent multiple instances of this class being created*/
 	private static Navigation navigation = null;
-	
 	
 	/**
 	 * Constructor
@@ -53,7 +53,7 @@ public class Navigation {
 	}
 	
 	public static Navigation getNavigation(Odometer odo){
-		if(navigation == null){
+		if(navigation==null){
 			navigation = new Navigation(odo);
 		}
 		

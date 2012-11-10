@@ -69,6 +69,7 @@ public class FieldScanner implements TimerListener {
 	/**Stores the x and y positions of the current tile.*/
 	private  int[] currentTile = new int[2];
 	
+	
 	/**
 	 * This method is periodically called when the robot is rotating 360
 	 * degrees. It stores the angle at which the maximum light reading occurs
@@ -93,12 +94,11 @@ public class FieldScanner implements TimerListener {
 		this.us = SensorAndMotorInfo.getUsSensor();
 		this.ls = SensorAndMotorInfo.getLeftLightSensor();
 		this.odo = odo;
-		this.nav = Navigation.getNavigation(odo);
 		ls.setFloodlight(false);
 	}
-
+	
 	public static FieldScanner getFieldScanner(Odometer odo){
-		if(fieldScanner==null){
+		if(fieldScanner == null){
 			fieldScanner = new FieldScanner(odo);
 		}
 		

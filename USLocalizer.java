@@ -21,7 +21,7 @@ public class USLocalizer {
 	/**Used to set the speeds of he robot.*/
 	private TwoWheeledRobot robot;
 	/**The US sensor is used to get distance to the light source.*/
-	private UltrasonicSensor us;
+	private USSensor us;
 	/**The type of location technique to employ.*/
 	private LocalizationType locType;
 	/**The number of times a wall is detected.*/
@@ -32,11 +32,12 @@ public class USLocalizer {
 	/**
 	 * Constructor. 
 	 */
-	public USLocalizer(Odometer odo, UltrasonicSensor us, LocalizationType locType) {
+	public USLocalizer(Odometer odo, USSensor us, LocalizationType locType) {
 		this.odo = odo;
 		this.robot = odo.getTwoWheeledRobot();
 		this.us = us;
 		this.locType = locType;
+		RConsole.println("About to get navigation object");
 		this.nav = Navigation.getNavigation(odo);
 		// switch off the ultrasonic sensor
 		//us.off();
@@ -53,36 +54,43 @@ public class USLocalizer {
 		if (locType == LocalizationType.FALLING_EDGE) {
 			// rotate the robot until it sees no wall
 			while(getFilteredData() <= WALL_DIST||noObjDetectCount<5){
+				RConsole.println(""+us.getFilteredDistance());
 				robot.setRotationSpeed(ROTATION_SPEED);
 			}
-			
+			RConsole.println("Robot sees no wall");
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
-			while(getFilteredData()>(WALL_DIST + NOISE)||objDetectCount<5){
+			while(getFilteredData()>WALL_DIST + NOISE||objDetectCount<5){
+				RConsole.println(""+us.getFilteredDistance());
 				robot.setRotationSpeed(ROTATION_SPEED);
 			}
 			odo.getPosition(noisePos);	
 			while(getFilteredData()>=WALL_DIST - NOISE||objDetectCount<5){
+				RConsole.println(""+us.getFilteredDistance());
 				robot.setRotationSpeed(ROTATION_SPEED);
 			}
 			Sound.beep();
 			odo.getPosition(pos);
 			angleA = (pos[2]+noisePos[2])/2;
-			
+			RConsole.println("Moving till robot sees no wall");
 			// switch direction and wait until it sees no wall
 			while(getFilteredData()<WALL_DIST||noObjDetectCount<5){
+				RConsole.println(""+us.getFilteredDistance());
 				robot.setRotationSpeed(-ROTATION_SPEED);
 			}
 			
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
 			while(getFilteredData()>WALL_DIST+NOISE||objDetectCount<5){
+				RConsole.println(""+us.getFilteredDistance());
 				robot.setRotationSpeed(-ROTATION_SPEED);
 			}
 			odo.getPosition(noisePos);
 			while(getFilteredData()>=WALL_DIST-NOISE||objDetectCount<5){
+				RConsole.println(""+us.getFilteredDistance());
 				robot.setRotationSpeed(-ROTATION_SPEED);
 			}
+			RConsole.println("Robot saw a wall");
 			Sound.beep();
 			odo.getPosition(pos);
 			angleB = (pos[2]+noisePos[2])/2;
