@@ -11,7 +11,7 @@ import lejos.util.Timer;
 public class Main {
 
 	public static void main(String[] args){
-		RConsole.openBluetooth(2000);
+		RConsole.openBluetooth(5000);
 		int buttonChoice;
 		LCD.clear();
 		do{
@@ -33,6 +33,14 @@ public class Main {
 		Timer ab;
 		}else if (buttonChoice == Button.ID_RIGHT){
 			USSensor usSensor = SensorAndMotorInfo.getUsSensor();
+			/*while(true){
+				RConsole.println("dist: "+usSensor.getDistance());
+				try{
+					Thread.sleep(10);
+				}catch(InterruptedException e){
+					
+				}
+			}*/
 			//LightSensor leftLS = SensorAndMotorInfo.getLeftLightSensor();
 			//LightSensor rightLS = SensorAndMotorInfo.getRightLightSensor();
 			TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);
@@ -45,10 +53,16 @@ public class Main {
 					USLocalizer.LocalizationType.FALLING_EDGE);
 			RConsole.println("Created usl object");
 			usl.doLocalization();
-			//Navigation nav = Navigation.getNavigation(odo);
-			//nav.moveToTile(0, 0);
+			Navigation nav = Navigation.getNavigation(odo);
+			RConsole.println("Got navigation object");
+			//nav.moveTo(0,2);
+			//nav.travelTo(-15.24,-15.24);
+			//nav.turnTo(0.0);
+			nav.traveToUsingSearchAlgo(60,60);
+			nav.stopGoingStraight();
 		}
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+		RConsole.close();
 		System.exit(0);
 	
 		

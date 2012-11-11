@@ -136,14 +136,18 @@ public class FieldScanner implements TimerListener {
 		timer.stop();
 	}
 
+	public void setNavigation(Navigation navigation){
+		nav = navigation;
+	}
+	
 	public void markObstacle(int distanceToObstacle){
 		double[] pos = new double[3];
 		odo.getPosition(pos);
 		double currentXDist = pos[0];
 		double currentYDist = pos[1];
 		double currentTheta = pos[2];
-		int[] tiles;
-		
+		int[] tiles = new int[2];
+
 		if(Math.abs(Odometer.minimumAngleFromTo(currentTheta, 0))<=ANGLE_TOLERANCE){
 			//Obstacle is in +ve y direction.
 			tiles = nav.convertDistancesToTiles(currentXDist, currentYDist+distanceToObstacle);

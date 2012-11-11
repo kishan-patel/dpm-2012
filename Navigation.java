@@ -7,7 +7,9 @@ public class Navigation {
 	private final static double ROTATION_TOLERANCE = 0.5;
 	
 	/**The allowed tolerance in the distance to a particular point.*/
-	private final double DISTANCE_ERROR = 2;
+	private final double FIANL_DISTANCE_ERROR = 2;
+	
+	private final double DISTANCE_ERROR_WHILE_TRAVELLING = 1;
 	
 	/**Dimension of a tile*/
 	private final double TILE_DIM = 30.48;
@@ -19,7 +21,7 @@ public class Navigation {
 	private int ROTATION_SPEED = 15;
 	
 	/**The forward speed.*/
-	private static double FORWARD_SPEED = 15;
+	private static double FORWARD_SPEED = 8;
 		
 	/**An array which holds the odometry information for the robot at a given point in time.*/
 	private double[] position = new double[3];
@@ -50,6 +52,7 @@ public class Navigation {
 		this.searchAlgorithm = new SearchAlgorithm();
 		this.usSensor = SensorAndMotorInfo.getUsSensor();
 		this.fieldScanner = FieldScanner.getFieldScanner(odo);
+		this.fieldScanner.setNavigation(this);
 	}
 	
 	public static Navigation getNavigation(Odometer odo){
@@ -86,17 +89,21 @@ public class Navigation {
 			destTiles = searchAlgorithm.getNextXYTile(currentTile[0],xDestTile,currentTile[1],yDestTile);
 			nextXTile = destTiles[0];
 			nextYTile = destTiles[1];
-			distX = nextXTile*(TILE_DIM+HALF_TILE_DIM);
-			distY = nextYTile*(TILE_DIM+HALF_TILE_DIM);
+			distX = nextXTile*HALF_TILE_DIM;
+			distY = nextYTile*HALF_TILE_DIM;
 			isObstacleInTheWay = isObstacleInTheWay(distX,distY);
+			
 			if(isObstacleInTheWay){
 				distanceToObstacle = usSensor.getFilteredDistance();
 				fieldScanner.markObstacle(distanceToObstacle);
+				RConsole.println("Succesfully marked obstacle.");
 			}else{
 				travelTo(distX,distY);
 				fieldScanner.setCurrentTile(nextXTile, nextYTile);
 			}
 		}while((xDestTile-nextXTile)!=0||(yDestTile-nextYTile)!=0);
+		
+		robot.setForwardSpeed(0.0);
 	}
 	
 	public boolean isObstacleInTheWay(double x, double y){
@@ -118,28 +125,48 @@ public class Navigation {
 		
 		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=ROTATION_TOLERANCE){
 			//Obstacle may be in +ve y direction.
-			if(Math.abs(odo.getYPos()-distY)>DISTANCE_ERROR){
+			if(Math.abs(odo.getYPos()-distY)>FIANL_DISTANCE_ERROR){
 				return true;
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=ROTATION_TOLERANCE){
 			//Obstacle may be in +ve x direction.
-			if(Math.abs(odo.getXPos()-distX)>DISTANCE_ERROR){
+			if(Math.abs(odo.getXPos()-distX)>FIANL_DISTANCE_ERROR){
 				return true;
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 270))<=ROTATION_TOLERANCE){
 			//Obstacle may be in -ve y direction.
-			if(Math.abs(odo.getYPos()-distY)>DISTANCE_ERROR){
+			if(Math.abs(odo.getYPos()-distY)>FIANL_DISTANCE_ERROR){
 				return true;
 			}
 		}else{
 			//Obstacle may be in -ve x direction.
-			if(Math.abs(odo.getXPos()-distX)>DISTANCE_ERROR){
+			if(Math.abs(odo.getXPos()-distX)>FIANL_DISTANCE_ERROR){
 				return true;
 			}
 		}
 		
 		return false;
 		
+	}
+	
+	public void traveToUsingSearchAlgo(double x, double y){
+		double[]nextCoords;
+		double nextXCoord,nextYCoord;
+	
+		do{
+			odo.getPosition(position);
+			nextCoords = searchAlgorithm.getNextXYCoordinate(position[0], x, position[1], y);
+			nextXCoord = nextCoords[0];
+			nextYCoord = nextCoords[1];
+			travelTo(nextXCoord,nextYCoord);
+			odo.getPosition(position);
+			RConsole.println("current x odo. = "+position[0]);
+			RConsole.println("current y odo. = "+position[1]);
+			RConsole.println("next x coordinate = "+nextXCoord);
+			RConsole.println("next y coordinage = "+nextYCoord);
+		}while(Math.abs(position[0]-x)>FIANL_DISTANCE_ERROR || (Math.abs(position[1]-y))>FIANL_DISTANCE_ERROR);
+		
+		robot.setForwardSpeed(0.0);
 	}
 	
 	public double[] convertTilesToDistances(int xTile, int yTile){
@@ -178,10 +205,11 @@ public class Navigation {
 			turnTo(theta);
 		}
 		
+		robot.setForwardSpeed(FORWARD_SPEED);
+		robot.setForwardSpeed(FORWARD_SPEED);
 		//Causes the robot to move forward until it reaches the destination x and y coordinates.
-		while(Math.abs(position[0]-x)>DISTANCE_ERROR || (Math.abs(position[1]-y))>DISTANCE_ERROR){
+		while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING || (Math.abs(position[1]-y))>DISTANCE_ERROR_WHILE_TRAVELLING){
 			odo.getPosition(position);
-			robot.setForwardSpeed(FORWARD_SPEED);
 		}
 		
 		//Stops forward motion.
