@@ -7,7 +7,7 @@ import lejos.util.TimerListener;
 
 public class FieldScanner implements TimerListener {
 	/** This number represents the intensity of the light source. */
-	private final static int MIN_LIGHT_INTENSITY = 40;
+	private final static int MIN_LIGHT_INTENSITY = 42;
 	
 	/**The tolerance allowed in the angle reading*/
 	private final int ANGLE_TOLERANCE = 2;
@@ -31,11 +31,11 @@ public class FieldScanner implements TimerListener {
 	private Odometer odo;
 
 	/** The US sensor is used to get distance to the light source. */
-	private UltrasonicSensor us;
+	private USSensor us;
 
 	/** The light sensor is used to locate the light source. */
 	private LightSensor ls;
-
+	
 	/** Used to control the forward motion and rotation of the robot. */
 	private Navigation nav;
 
@@ -69,6 +69,8 @@ public class FieldScanner implements TimerListener {
 	/**Stores the x and y positions of the current tile.*/
 	private  int[] currentTile = new int[2];
 	
+	/**When a beacon is located, this parameter specifies whether it is in the range of us as well*/
+	private boolean beaconWithinRangeOfUS = false;
 	
 	/**
 	 * This method is periodically called when the robot is rotating 360
@@ -97,6 +99,11 @@ public class FieldScanner implements TimerListener {
 		ls.setFloodlight(false);
 	}
 	
+	/**
+	 * Ensures that a single instance of FieldScanner is exists.
+	 * @param odo The odometer object associated with this robot.
+	 * @return A FieldScanner object.
+	 */
 	public static FieldScanner getFieldScanner(Odometer odo){
 		if(fieldScanner == null){
 			fieldScanner = new FieldScanner(odo);
@@ -111,12 +118,15 @@ public class FieldScanner implements TimerListener {
 	 */
 	public void reset() {
 		maxLightReading = 0;
+		beaconWithinRangeOfUS = false;
 	}
 
 	/**
-	 * 
+	 * A beacon is considered to be located if the value of the max light reading while doing
+	 * a 360 degree turn is above a certain treshold.
+	 * @return A boolean value indicating whether the beacon was located.
 	 */
-	public boolean LightSourceFound() {
+	public boolean beaconLocated() {
 		if (maxLightReading > MIN_LIGHT_INTENSITY) {
 			return true;
 		}
@@ -124,11 +134,17 @@ public class FieldScanner implements TimerListener {
 		return false;
 	}
 
-	public void turnToLightSourceHeading() {
+	/**
+	 * This method is called when the beacon is located. It orients the robot towards the beacon.
+	 */
+	public void turnToBeacon() {
 		nav.turnTo(angleOfMaxLightReading);
 	}
 
-	public void locateLightSource() {
+	/**
+	 * This method does a 360 degree turn to locate the beacon.
+	 */
+	public void locateBeacon() {
 		reset();
 		Timer timer = new Timer(10, this);
 		timer.start();
@@ -136,6 +152,31 @@ public class FieldScanner implements TimerListener {
 		timer.stop();
 	}
 
+	/**
+	 * When this method is called, the robot should have located the beacon and be facing it. If these conditions
+	 * are met, this method returns whether the beacon is detected by the US sensor.
+	 * @return Returns true if the distance reported by the US sensor is less than 100cm. False otherwise.
+	 */
+	public boolean isBeaconDetectedByUS() {
+		if (us.getFilteredDistance() < 100) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * This method requires the robot to be facing the beacon.
+	 * @return The distance to the beacon as recorded by the US sensor.
+	 */
+	public int getDistanceToBeacon(){
+		return us.getFilteredDistance();
+	}
+	
+	/**
+	 * Provides the FieldScanner class access to the navigation object.
+	 * @param navigation The navigation object associated with the robot.
+	 */
 	public void setNavigation(Navigation navigation){
 		nav = navigation;
 	}
@@ -174,6 +215,10 @@ public class FieldScanner implements TimerListener {
 		currentTile[1] = yCurrentTile;
 	}
 	
+	/**
+	 * Provides access to the field info array.
+	 * @return The field info. for this robot.
+	 */
 	public static int[][] getFieldInfo(){
 		return fieldInfo;
 	}

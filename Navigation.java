@@ -49,7 +49,7 @@ public class Navigation {
 	private Navigation(Odometer odo) {
 		this.odo = odo;
 		this.robot = odo.getTwoWheeledRobot();
-		this.searchAlgorithm = new SearchAlgorithm();
+		this.searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
 		this.usSensor = SensorAndMotorInfo.getUsSensor();
 		this.fieldScanner = FieldScanner.getFieldScanner(odo);
 		this.fieldScanner.setNavigation(this);
@@ -267,6 +267,8 @@ public class Navigation {
 		destAngle = currPos[2];
 		angleDiff = Odometer.minimumAngleFromTo(currPos[2], destAngle);
 
+		robot.setRotationSpeed(ROTATION_SPEED);
+		robot.setRotationSpeed(ROTATION_SPEED);
 		//While loop executes until the robot hasn't rotated by 360 degrees.
 		while(Math.abs(angleDiff)>ROTATION_TOLERANCE||!startedRotation){
 			if(Math.abs(angleDiff)>ROTATION_TOLERANCE+5 && !startedRotation){
@@ -274,7 +276,6 @@ public class Navigation {
 			}
 			odo.getPosition(currPos);
 			angleDiff = Odometer.minimumAngleFromTo(currPos[2], destAngle);
-			robot.setRotationSpeed(ROTATION_SPEED);
 		}
 		
 		//Stop the rotation
