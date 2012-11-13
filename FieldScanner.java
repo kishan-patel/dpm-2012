@@ -7,7 +7,7 @@ import lejos.util.TimerListener;
 
 public class FieldScanner implements TimerListener {
 	/** This number represents the intensity of the light source. */
-	private final static int MIN_LIGHT_INTENSITY = 42;
+	private final static int MIN_LIGHT_INTENSITY = 30;
 	
 	/**The tolerance allowed in the angle reading*/
 	private final int ANGLE_TOLERANCE = 2;
@@ -94,7 +94,7 @@ public class FieldScanner implements TimerListener {
 	 */
 	private FieldScanner(Odometer odo) {
 		this.us = SensorAndMotorInfo.getUsSensor();
-		this.ls = SensorAndMotorInfo.getLeftLightSensor();
+		this.ls = SensorAndMotorInfo.getBeaconFinderLightSensor();
 		this.odo = odo;
 		ls.setFloodlight(false);
 	}

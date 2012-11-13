@@ -22,6 +22,6 @@ public class USSensor extends UltrasonicSensor{
 			distance = currentDistance;
 		}
 		
-		return distance;
+		return currentDistance;
 	}
 }

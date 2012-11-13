@@ -32,23 +32,27 @@ public class Main {
 			FieldScanner fieldScanner = FieldScanner.getFieldScanner(odo);
 			SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
 			USLocalizer usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
-			/*while(true){
+			LightSensor ls = SensorAndMotorInfo.getBeaconFinderLightSensor();
+			ls.setFloodlight(LightSensor.BLUE);
+			ls.setFloodlight(true);
+			while(true){
 				RConsole.println("Light reading: "+ls.getLightValue());
 				try{
 					Thread.sleep(100);
 				}catch(InterruptedException e){
 					
 				}
-			}*/
-			usl.doLocalization();
+			}
+			// SquareDriver.drive(Motor.A,Motor.B,2.60,2.60,18.0);
+			/*usl.doLocalization();
 			Sound.beep();
 			Sound.beep();
 			Sound.beep();
 			try{Thread.sleep(10000);}catch(InterruptedException e){}
 			nav.turn360();
-			nav.traveToUsingSearchAlgo(60.0, 60.0);
-			/*fieldScanner.locateBeacon();
-			fieldScanner.turnToBeacon();*/
+			nav.traveToUsingSearchAlgo(60.0, 60.0);*/
+			//fieldScanner.locateBeacon();
+			//fieldScanner.turnToBeacon();
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			//bluet
@@ -68,12 +72,14 @@ public class Main {
 			double[] position = new double[3];
 			/*Process of steps that are executed in order to find the beacon and travel to it.*/
 			usl.doLocalization();
+			try{Thread.sleep(5000);}catch(InterruptedException e){}
 			while(!beaconFound){
 				fieldScanner.locateBeacon();
 				
 				if(!fieldScanner.beaconLocated()){
 					//The beacon has not yet been located. Thus, we go to the next position
 					//in our search algorithm.
+					RConsole.println("Beacon not located");
 					nextSearchLocation = searchAlgorithm.getNextSearchLocation();
 					if(nextSearchLocation == null){
 						beaconFound = true;
@@ -90,13 +96,16 @@ public class Main {
 					}else{
 						distToBeacon = 255;
 					}
-					
+					RConsole.println("Distance to beacon: "+distToBeacon);
 					if(distToBeacon<30.48){
+						RConsole.println("Distance to beacon is within 1 tile");
 						beaconFound = true;
 						break;
 					}else{
 						odo.getPosition(position);
 						nextSearchLocation = searchAlgorithm.getNextLocCloserToBeacon(position[0], position[1], position[2], distToBeacon);
+						RConsole.println("Next x: "+nextSearchLocation[0]);
+						RConsole.println("Next y: "+nextSearchLocation[1]);
 						nav.traveToUsingSearchAlgo(nextSearchLocation[0], nextSearchLocation[1]);
 					}
 				}
