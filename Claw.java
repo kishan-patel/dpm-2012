@@ -1,3 +1,7 @@
+/**
+ * @author Afif Sani 260369334
+ */
+
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.Motor;
@@ -15,6 +19,7 @@ public class Claw {
 
 	private NXTRegulatedMotor clawMotor;
 	private NXTRegulatedMotor pulleyMotor;
+	private NXTRegulatedMotor pulleyMotor2;
 	//private NXTRegulatedMotor clawMotor = Motor.B;
 	//private NXTRegulatedMotor pulleyMotor = Motor.A;	
 	private boolean open;
@@ -23,10 +28,11 @@ public class Claw {
 	/**
 	 * Constructor.
 	 */
-	public Claw(NXTRegulatedMotor pulleyMotor, NXTRegulatedMotor clawMotor){
+	public Claw(NXTRegulatedMotor pulleyMotor, NXTRegulatedMotor pulleyMotor2, NXTRegulatedMotor clawMotor){
 	
 	this.clawMotor = clawMotor;
-	this.pulleyMotor = pulleyMotor;	
+	this.pulleyMotor = pulleyMotor;
+	this.pulleyMotor2 = pulleyMotor2;
 	this.open = false;
 	this.currentHeight = pulleyHeight;
 
@@ -50,7 +56,7 @@ public class Claw {
 						e.printStackTrace();
 					}					
 					
-					claw.moveClaw(noOfRotsPulley);
+					claw.moveClaw(-noOfRotsPulley);
 									
 	}
 	
@@ -97,8 +103,11 @@ public class Claw {
 	
 	private void moveClaw(int noOfRotsPulley){
 		pulleyMotor.setSpeed(pulleySpeed);
-		pulleyMotor.rotate(noOfRotsPulley);
+		pulleyMotor2.setSpeed(pulleySpeed);	
+		pulleyMotor.rotate(noOfRotsPulley,true);
+		pulleyMotor2.rotate(noOfRotsPulley);;
 		pulleyMotor.setSpeed(stop);
+		pulleyMotor2.setSpeed(stop);
 	}
 	
 }
