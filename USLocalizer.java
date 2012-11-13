@@ -109,7 +109,7 @@ public class USLocalizer {
 			if ( angleA > angleB){ 
 				angle = 45 - (angleA+angleB)/2;
 			}else{
-				angle = 223 - (angleA+angleB)/2;
+				angle = 225 - (angleA+angleB)/2;
 			}
 			
 			odo.setPosition(new double [] {0.0, 0.0, angleB+angle}, new boolean [] {true, true, true});
