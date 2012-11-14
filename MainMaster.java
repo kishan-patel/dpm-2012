@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
-import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.comm.Bluetooth;
 import lejos.nxt.comm.NXTConnection;
@@ -39,11 +38,12 @@ public class MainMaster {
 	private static FieldScanner fieldScanner;
 	private static SearchAlgorithm searchAlgorithm;
 	private static USLocalizer usl;
+	private static LSLocalizer ls;
 	
 	public static void main(String[] args){
 		//connectToBTServer();
 		//connectToSlave();
-		RConsole.openUSB(5000);
+		RConsole.openBluetooth(5000);
 		int buttonChoice;
 		LCD.clear();
 		do{
@@ -54,17 +54,7 @@ public class MainMaster {
 
 		if(buttonChoice == Button.ID_LEFT){
 			//Defender code
-			USSensor us = SensorAndMotorInfo.getUsSensor();
-			LightSensor ls = SensorAndMotorInfo.getBeaconFinderLightSensor();
-			while(true){
-				RConsole.println("us-dist: "+us.getDistanceToObstacle());
-				RConsole.println("LS-Value: "+ls.getLightValue());
-				try{
-					Thread.sleep(500);
-				}catch(InterruptedException e){
-					
-				}
-			}
+			
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			findAndGoToBeacon();
@@ -133,6 +123,7 @@ public class MainMaster {
 		FieldScanner fieldScanner = FieldScanner.getFieldScanner(odo);
 		SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
 		USLocalizer usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
+		LSLocalizer ls = new LSLocalizer(odo,SensorAndMotorInfo.RIGHT_LIGHT_SENSOR);
 		boolean beaconFound = false;
 		double[] nextSearchLocation;
 		boolean isBeaconDetectedByUS = false;
@@ -140,8 +131,10 @@ public class MainMaster {
 		double[] position = new double[3];
 		/*Process of steps that are executed in order to find the beacon and travel to it.*/
 		usl.doLocalization();
+		ls.doLocalization();
+		
 		try{Thread.sleep(5000);}catch(InterruptedException e){}
-		while(!beaconFound){
+		/*while(!beaconFound){
 			fieldScanner.locateBeacon();
 			
 			if(!fieldScanner.beaconLocated()){
@@ -175,8 +168,9 @@ public class MainMaster {
 					RConsole.println("Next x: "+nextSearchLocation[0]);
 					RConsole.println("Next y: "+nextSearchLocation[1]);
 					nav.traveToUsingSearchAlgo(nextSearchLocation[0], nextSearchLocation[1]);
-				}
-			}
-		}
+					
+				} 
+			} 
+		}*/
 	}
 }
