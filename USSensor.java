@@ -24,4 +24,28 @@ public class USSensor extends UltrasonicSensor{
 		
 		return currentDistance;
 	}
+	
+	public int getDistanceToObstacle(){
+		int noOfObjectDetections = 0;
+		int currentDistance=0;
+		int totalDistance=0;
+		
+		for(int i=0; i<10; i++){
+			currentDistance = getDistance();
+			if(currentDistance<=100){
+				noOfObjectDetections++;
+				totalDistance+=currentDistance;
+			}
+			try{
+				Thread.sleep(10);
+			}catch(InterruptedException e){
+			}
+		}
+		
+		if(noOfObjectDetections>7){
+			return totalDistance/noOfObjectDetections;
+		}else{
+			return 255;
+		}
+	}
 }

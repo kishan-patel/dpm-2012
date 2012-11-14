@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
+import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.comm.Bluetooth;
 import lejos.nxt.comm.NXTConnection;
@@ -41,8 +42,8 @@ public class MainMaster {
 	
 	public static void main(String[] args){
 		//connectToBTServer();
-		connectToSlave();
-		RConsole.openBluetooth(5000);
+		//connectToSlave();
+		RConsole.openUSB(5000);
 		int buttonChoice;
 		LCD.clear();
 		do{
@@ -53,9 +54,20 @@ public class MainMaster {
 
 		if(buttonChoice == Button.ID_LEFT){
 			//Defender code
+			USSensor us = SensorAndMotorInfo.getUsSensor();
+			LightSensor ls = SensorAndMotorInfo.getBeaconFinderLightSensor();
+			while(true){
+				RConsole.println("us-dist: "+us.getDistanceToObstacle());
+				RConsole.println("LS-Value: "+ls.getLightValue());
+				try{
+					Thread.sleep(500);
+				}catch(InterruptedException e){
+					
+				}
+			}
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
-			//findAndGoToBeacon();
+			findAndGoToBeacon();
 			try{
 				dos.writeInt(OPEN);
 				dos.flush();
