@@ -10,9 +10,9 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class Claw {
 	private final int pulleyMotorRadius = 1;
-	private final int pulleyHeight = 12;
+	public final static int pulleyHeight = 3;
 	private final int pulleySpeed = 100;
-	//private final int noOfRotsPulley = (int) (360*pulleyHeight/(2*Math.PI*pulleyMotorRadius)); // The value is in angle, 360=1 rotation, 720=2 rotations
+	private final static double ONE_ROTATION = 8.4;
 	private final int clawSpeed = 10;	
 	private final int noOfRotsClaw = 80;	
 	static final int stop = 0;
@@ -47,7 +47,7 @@ public class Claw {
 		height = height - this.currentHeight;		
 		this.currentHeight = oldHeight;		
 		
-		int noOfRotsPulley = (int) (360*height/(2*Math.PI*pulleyMotorRadius));				
+		int noOfRotsPulley = (int) (360.0*(double)height/ONE_ROTATION);				
 
 					try {				
 						Thread.sleep(100);			
@@ -65,7 +65,7 @@ public class Claw {
 	 */
 	public void pickUpBeacon(){
 		
-		if( this.open ){
+		if( this.open == true ){
 			
 			closeClaw();
 			this.open = false;
@@ -73,17 +73,7 @@ public class Claw {
 		}else{
 
 			openClaw();
-			this.open = true;
-
-			try {				
-				Thread.sleep(1000);			
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			closeClaw();
-			this.open = false;
+			this.open = true;			
 			
 		}
 			

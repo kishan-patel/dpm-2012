@@ -38,13 +38,14 @@ public class MainSlave {
 		}).start();
 		
 		LCD.drawString("Starting BT connection", 0, 0);
-
+		// Starting the input and output stream
 		connectionToMaster = Bluetooth.waitForConnection();
 		dis = connectionToMaster.openDataInputStream();
 		LCD.drawString("Opened DIS", 0, 1);
 		dos = connectionToMaster.openDataOutputStream();
 		LCD.drawString("Opened DOS", 0, 2);
 		
+		// Data stream for opening the claw
 		try {// Waiting if there is a data stream available
 			while (dis.available() <= 0)
 				Thread.sleep(10);
@@ -61,6 +62,7 @@ public class MainSlave {
 				claw.openClaw();	
 					
 			}
+			// Feedback for master
 			dos.writeBoolean(true);
 			dos.flush();
 
@@ -85,7 +87,8 @@ public class MainSlave {
 				LCD.clear(3);
 				LCD.clear(4);
 				LCD.clear(5);
-					
+		
+		// Data stream for moving the claw to certain height 			
 		try {// Waiting if there is a data stream available
 			while (dis.available() <= 0)
 				Thread.sleep(10);
@@ -94,17 +97,19 @@ public class MainSlave {
 			buffer = dis.readInt();
 			
 		
-			LCD.drawString("Received information", 0, 3);
-			LCD.drawString("Sent confirmation", 0, 4);
+			LCD.drawString("Received information", 0, 3);			
 			LCD.drawInt(buffer, 0, 5);
+			LCD.drawString("Sent confirmation", 0, 4);
 			
-			// This is going to open the claw
+			// This is going to grab the beacon
 			if(buffer > -1){
 				
 				claw.moveToHeight(buffer);
 				claw.pickUpBeacon();
+				claw.moveToHeight(claw.pulleyHeight);
 					
 			}
+			// Feedback for master
 			dos.writeBoolean(true);			
 			dos.flush();
 
@@ -117,6 +122,38 @@ public class MainSlave {
 			e1.printStackTrace();
 		}		
 		
+		// Sleep for a while for confirmation
+		try {				
+						Thread.sleep(2000);			
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}	
+					
+				LCD.clear(3);
+				LCD.clear(4);
+				LCD.clear(5);
+		
+		// Data stream to release the claw
+		try {// Waiting if there is a data stream available
+			while (dis.available() <= 0)
+				Thread.sleep(10);
+				
+			// Read the data stream
+			buffer = dis.readInt();
+		
+			LCD.drawString("Received information", 0, 3);
+			LCD.drawInt(buffer, 0, 5);
+			LCD.drawString("Sent confirmation", 0, 4);
+			// This is going to open the claw
+			if(buffer == -1){
+				
+				claw.openClaw();	
+					
+			}
+			// Feedback for the master
+			dos.writeBoolean(true);
+			dos.flush();
 		
 		while(true){
 			try {dis.close();} 
