@@ -56,7 +56,7 @@ public class Claw {
 						e.printStackTrace();
 					}					
 					
-					moveClaw(-noOfRotsPulley);
+					moveClaw(noOfRotsPulley);
 									
 	}
 	

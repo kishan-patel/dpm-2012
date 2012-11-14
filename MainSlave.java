@@ -62,7 +62,7 @@ public class MainSlave {
 					
 			}
 			dos.writeBoolean(true);
-			
+			dos.flush();
 
 			
 		} catch (IOException e1) {
@@ -106,7 +106,7 @@ public class MainSlave {
 					
 			}
 			dos.writeBoolean(true);			
-			
+			dos.flush();
 
 			
 		} catch (IOException e1) {
