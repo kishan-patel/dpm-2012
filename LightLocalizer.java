@@ -2,16 +2,16 @@ import lejos.nxt.LightSensor;
 import lejos.nxt.Sound;
 
 public class LightLocalizer {
-	private static int X_INITIAL = 0;
-	private static int X_FINAL = 2;
-	private static int Y_INITIAL = 1;
-	private static int Y_FINAL = 3;
+
 	private Odometer odo;
 	private TwoWheeledRobot robot;
 	private LightSensor ls;
 	private double ROTATION_SPEED = 20;
 	public double CENTER_ROTATION = 10.5;
 	public double BLACK_LINE = 42;
+	
+	private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
+	private int stage;
 	
 	public LightLocalizer(Odometer odo, LightSensor ls) {
 		this.odo = odo;
@@ -32,13 +32,45 @@ public class LightLocalizer {
 		double[] position = new double[3];
 		double[] lineCrossings = new double [4];
 		Navigation navigation = Navigation.getNavigation(odo);
-		double thetaX,thetaY,distX,distY,deltaTheta;
+		
 		
 		//drive to the location listed in the tutorial
-		navigation.travelTo(-1,-1);
+		navigation.travelTo(-5,-5);
+		
+		robot.setRotationSpeed(ROTATION_SPEED);
+		
+		//when first line is crossed, grab heading value from odometer
+		while(ls.getLightValue() < BLACK_LINE && stage==0){
+			thetaY = odo.getTheta();
+		} stage++;
+		
+		//when second line crossed, grab heading value from odometer
+		while(ls.getLightValue() < BLACK_LINE && stage==1){
+			thetaX = odo.getTheta();
+		} stage++;
+		
+		//when third line crossed, update thetaY value
+		while(ls.getLightValue() < BLACK_LINE && stage==2){
+			thetaZ = odo.getTheta();
+		} 
+		thetaY = thetaZ - thetaY;
+		stage++;
+		
+		//when fourth line crossed, update thetaX value
+		while(ls.getLightValue() < BLACK_LINE && stage==3){
+			thetaZ = odo.getTheta();
+		}
+		thetaX = thetaZ - thetaX;
+		
+		//calculate position
+		distX = -CENTER_ROTATION*Math.sin(Math.toRadians(thetaY/2));
+		distY = -CENTER_ROTATION*Math.sin(Math.toRadians(thetaX/2));
+		
+		deltaTheta = 270+thetaY/2; //formula to calculate correct heading
+		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
 		
 		//odo.setPosition(new double [] {0.0, 0.0, 0.0 }, new boolean [] {true, true, true});
-		while(line < 4){
+		/*while(line < 4){
 			robot.setRotationSpeed(ROTATION_SPEED);
 			if(ls.getLightValue() < BLACK_LINE){
 				count++;
@@ -52,15 +84,10 @@ public class LightLocalizer {
 				Sound.beep();
 			}
 		}
+		*/
 		robot.setRotationSpeed(0);
 	
-		// do trig to compute (0,0) and 0 degrees
-		thetaX = lineCrossings[X_FINAL] - lineCrossings[X_INITIAL];
-		thetaY = lineCrossings[Y_FINAL] - lineCrossings[Y_INITIAL];
-		distX = -CENTER_ROTATION * Math.cos(Math.toRadians(thetaY/2)); //formula to calculate x coordinate
-		distY = -CENTER_ROTATION * Math.cos(Math.toRadians(thetaX/2)); //formula to calculate y coordinate
-		deltaTheta = 270+thetaY/2; //formula to calculate correct heading
-		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
+		
 				
 		// when done travel to (0,0) and turn to 0 degrees
 		navigation.travelTo(0, 0); 
