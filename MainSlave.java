@@ -106,7 +106,7 @@ public class MainSlave {
 				
 				claw.moveToHeight(buffer);
 				claw.pickUpBeacon();
-				claw.moveToHeight(claw.pulleyHeight);
+				claw.moveToHeight(Claw.pulleyHeight);
 					
 			}
 			// Feedback for master
