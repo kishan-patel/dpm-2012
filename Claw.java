@@ -95,7 +95,7 @@ public class Claw {
 		clawMotor.setSpeed(stop);
 	}
 	
-	private void openClaw(){
+	public void openClaw(){
 		clawMotor.setSpeed(clawSpeed);
 		clawMotor.rotate(-noOfRotsClaw);
 		clawMotor.setSpeed(stop);

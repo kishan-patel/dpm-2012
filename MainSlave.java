@@ -53,9 +53,16 @@ public class MainSlave {
 			buffer = dis.readInt();
 		
 			LCD.drawString("Received information", 0, 3);
-
-			dos.writeBoolean(true);
+			LCD.drawInt(buffer, 0, 5);
 			LCD.drawString("Sent confirmation", 0, 4);
+			// This is going to open the claw
+			if(buffer == -1){
+				
+				claw.openClaw();	
+					
+			}
+			dos.writeBoolean(true);
+			
 
 			
 		} catch (IOException e1) {
@@ -65,14 +72,7 @@ public class MainSlave {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		LCD.drawInt(buffer, 0, 5);
-		
-		// This is going to open the claw
-		if(buffer == 1){
-			
-			claw.pickUpBeacon();	
-				
-		}
+	
 		
 		// Sleep for a while for confirmation
 		try {				
@@ -95,9 +95,18 @@ public class MainSlave {
 			
 		
 			LCD.drawString("Received information", 0, 3);
-
-			dos.writeBoolean(true);			
 			LCD.drawString("Sent confirmation", 0, 4);
+			LCD.drawInt(buffer, 0, 5);
+			
+			// This is going to open the claw
+			if(buffer > -1){
+				
+				claw.moveToHeight(buffer);
+				claw.pickUpBeacon();
+					
+			}
+			dos.writeBoolean(true);			
+			
 
 			
 		} catch (IOException e1) {
@@ -107,15 +116,7 @@ public class MainSlave {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}		
-		LCD.drawInt(buffer, 0, 5);
 		
-		// This is going to open the claw
-		if(buffer > 1){
-			
-			claw.moveToHeight(buffer);
-			claw.pickUpBeacon();
-				
-		}
 		
 		while(true){
 			try {dis.close();} 
