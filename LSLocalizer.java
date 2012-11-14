@@ -20,7 +20,7 @@ import lejos.nxt.comm.RConsole;
 		private final double DCENTER = 10.0;
 		
 		/**Speed of robot's rotation**/
-		private final double ROTATION_SPEED = 10.0;
+		private final double ROTATION_SPEED = -10.0;
 		
 		/**Low light value signifying a black line**/
 		private final double LOW_LIGHT = 40;
@@ -52,6 +52,8 @@ import lejos.nxt.comm.RConsole;
 		
 		//Localization method
 		public void doLocalization(){
+			
+			RConsole.println("light");
 			
 			//travel to a point where localization can begin
 			nav.travelTo(0, 0);
