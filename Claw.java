@@ -56,7 +56,7 @@ public class Claw {
 						e.printStackTrace();
 					}					
 					
-					claw.moveClaw(-noOfRotsPulley);
+					moveClaw(-noOfRotsPulley);
 									
 	}
 	
@@ -65,15 +65,15 @@ public class Claw {
 	 */
 	public void pickUpBeacon(){
 		
-		if( claw.open ){
+		if( this.open ){
 			
-			claw.closeClaw();
-			claw.open = false;
+			closeClaw();
+			this.open = false;
 
 		}else{
 
-			claw.openClaw();
-			claw.open = true;
+			openClaw();
+			this.open = true;
 
 			try {				
 				Thread.sleep(1000);			
@@ -82,8 +82,8 @@ public class Claw {
 				e.printStackTrace();
 			}
 
-			claw.closeClaw();
-			claw.open = false;
+			closeClaw();
+			this.open = false;
 			
 		}
 			

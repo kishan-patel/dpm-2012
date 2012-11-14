@@ -14,21 +14,18 @@ import lejos.nxt.Button;
 
 
 
-public class BTTestSlave {
+public class MainSlave {
 
 	/**
 	 * @param args
 	 */
 	private static NXTConnection connectionToMaster;
 	private static DataInputStream dis;
-	private static DataOutputStream dos;
-	private NXTRegulatedMotor clawMotor = Motor.B;
-	private NXTRegulatedMotor pulleyMotor = Motor.A;
-	private NXTRegulatedMotor pulleyMotor2 = Motor.C;
+	private static DataOutputStream dos;	
 
 	public static void main(String[] args) {
-		int buffer = 0;
-		Claw claw = new Claw(pulleyMotor, pulleyMotor2, clawMotor);
+		int buffer = 0;		
+		Claw claw = new Claw(SensorAndMotorInfo.pulleyMotor, SensorAndMotorInfo.pulleyMotor2, SensorAndMotorInfo.clawMotor);
 		// Exit program when escape button is pressed
 		(new Thread() {
 			public void run() {
@@ -53,7 +50,7 @@ public class BTTestSlave {
 				Thread.sleep(10);
 				
 			// Read the data stream
-			int buffer = dis.readInt();
+			buffer = dis.readInt();
 		
 			LCD.drawString("Received information", 0, 3);
 
@@ -68,7 +65,7 @@ public class BTTestSlave {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		LCD.drawString(buffer, 0, 5);
+		LCD.drawInt(buffer, 0, 5);
 		
 		// This is going to open the claw
 		if(buffer == 1){
@@ -94,7 +91,7 @@ public class BTTestSlave {
 				Thread.sleep(10);
 				
 			// Read the data stream
-			int buffer = dis.readInt();
+			buffer = dis.readInt();
 			
 		
 			LCD.drawString("Received information", 0, 3);
@@ -110,7 +107,7 @@ public class BTTestSlave {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}		
-		LCD.drawString(buffer, 0, 5);
+		LCD.drawInt(buffer, 0, 5);
 		
 		// This is going to open the claw
 		if(buffer > 1){
