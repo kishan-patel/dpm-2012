@@ -10,7 +10,7 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class Claw {
 	private final int pulleyMotorRadius = 1;
-	public final static int pulleyHeight = 3;
+	public final static int pulleyHeight = 2;
 	private final int pulleySpeed = 100;
 	private final static double ONE_ROTATION = 8.4;
 	private final int clawSpeed = 10;	
