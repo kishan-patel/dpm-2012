@@ -58,8 +58,10 @@ import lejos.nxt.comm.RConsole;
 			//travel to a point where localization can begin
 			nav.travelTo(0, 0);
 			
+			RConsole.println("Got navigation");
+			
 			//begin turning
-			robot.setSpeeds(0.0, ROTATION_SPEED);
+			robot.setRotationSpeed(ROTATION_SPEED);
 			
 			//when first line is crossed, grab heading value from odometer
 			while(lsright.getLightValue() < LOW_LIGHT && stage==0){

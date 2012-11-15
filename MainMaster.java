@@ -1,9 +1,9 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
+import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.comm.Bluetooth;
 import lejos.nxt.comm.NXTConnection;
@@ -54,11 +54,17 @@ public class MainMaster {
 
 		if(buttonChoice == Button.ID_LEFT){
 			//Defender code
+			LightSensor ls = SensorAndMotorInfo.getRightLightSensor();
+			while(true){
+				RConsole.println("LV: "+ls.getLightValue());
+				try{Thread.sleep(100);}catch(InterruptedException e){}
+				
+			}
 			
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			findAndGoToBeacon();
-			try{
+			/*try{
 				dos.writeInt(OPEN);
 				dos.flush();
 				LCD.drawString("Sent open instruc.",0,2);
@@ -78,7 +84,7 @@ public class MainMaster {
 				
 			}catch(InterruptedException e){
 				
-			}
+			}*/
 			
 			
 		}
@@ -123,17 +129,18 @@ public class MainMaster {
 		FieldScanner fieldScanner = FieldScanner.getFieldScanner(odo);
 		SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
 		USLocalizer usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
-		LSLocalizer ls = new LSLocalizer(odo,SensorAndMotorInfo.RIGHT_LIGHT_SENSOR);
+		LightLocalizer ls = new LightLocalizer(odo,SensorAndMotorInfo.RIGHT_LIGHT_SENSOR);
 		boolean beaconFound = false;
 		double[] nextSearchLocation;
 		boolean isBeaconDetectedByUS = false;
 		int distToBeacon;
 		double[] position = new double[3];
 		/*Process of steps that are executed in order to find the beacon and travel to it.*/
-		usl.doLocalization();
+		//usl.doLocalization();
+		//try{Thread.sleep(5000);}catch(InterruptedException e){}
 		ls.doLocalization();
 		
-		try{Thread.sleep(5000);}catch(InterruptedException e){}
+		
 		/*while(!beaconFound){
 			fieldScanner.locateBeacon();
 			
@@ -170,6 +177,12 @@ public class MainMaster {
 					nav.traveToUsingSearchAlgo(nextSearchLocation[0], nextSearchLocation[1]);
 					
 				} 
+				
+				nav.navigateTowardsLightSource(20);
+				nav.turnTo(odo.getTheta()-15.0);
+				nav.navigateTowardsLightSource(5);
+				beaconFound = true;
+				break;
 			} 
 		}*/
 	}
