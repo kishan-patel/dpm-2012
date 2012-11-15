@@ -37,7 +37,7 @@ public class LightLocalizer {
 		//drive to the location listed in the tutorial
 		navigation.travelTo(-5,-5);
 		
-		robot.setRotationSpeed(ROTATION_SPEED);
+		robot.setRotationSpeed(-ROTATION_SPEED);
 		
 		//when first line is crossed, grab heading value from odometer
 		while(ls.getLightValue() < BLACK_LINE && stage==0){
