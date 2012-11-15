@@ -44,16 +44,19 @@ public class LightLocalizer {
 		//when first line is crossed, grab heading value from odometer
 		while(ls.getLightValue() < BLACK_LINE && stage==0){
 			thetaY = odo.getTheta();
+			try{Thread.sleep(500);}catch(InterruptedException e) {}
 		} stage++;
 		RConsole.println("firstline");
 		//when second line crossed, grab heading value from odometer
 		while(ls.getLightValue() < BLACK_LINE && stage==1){
 			thetaX = odo.getTheta();
+			try{Thread.sleep(500);}catch(InterruptedException e) {}
 		} stage++;
 		RConsole.println("secondline");
 		//when third line crossed, update thetaY value
 		while(ls.getLightValue() < BLACK_LINE && stage==2){
 			thetaZ = odo.getTheta();
+			try{Thread.sleep(500);}catch(InterruptedException e) {}
 		} 
 		thetaY = thetaZ - thetaY;
 		stage++;
@@ -61,6 +64,7 @@ public class LightLocalizer {
 		//when fourth line crossed, update thetaX value
 		while(ls.getLightValue() < BLACK_LINE && stage==3){
 			thetaZ = odo.getTheta();
+			try{Thread.sleep(500);}catch(InterruptedException e) {}
 		}
 		RConsole.println("fourthline");
 		thetaX = thetaZ - thetaX;
