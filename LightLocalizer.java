@@ -1,5 +1,5 @@
 import lejos.nxt.LightSensor;
-import lejos.nxt.Sound;
+import lejos.nxt.comm.RConsole;
 
 public class LightLocalizer {
 
@@ -37,38 +37,43 @@ public class LightLocalizer {
 		//drive to the location listed in the tutorial
 		navigation.turnTo(90);
 		
+		try{Thread.sleep(2000);}catch(InterruptedException e) {}
+		
 		robot.setRotationSpeed(-ROTATION_SPEED);
 		
 		//when first line is crossed, grab heading value from odometer
 		while(ls.getLightValue() < BLACK_LINE && stage==0){
 			thetaY = odo.getTheta();
 		} stage++;
-		
+		RConsole.println("firstline");
 		//when second line crossed, grab heading value from odometer
 		while(ls.getLightValue() < BLACK_LINE && stage==1){
 			thetaX = odo.getTheta();
 		} stage++;
-		
+		RConsole.println("secondline");
 		//when third line crossed, update thetaY value
 		while(ls.getLightValue() < BLACK_LINE && stage==2){
 			thetaZ = odo.getTheta();
 		} 
 		thetaY = thetaZ - thetaY;
 		stage++;
-		
+		RConsole.println("thirdline");
 		//when fourth line crossed, update thetaX value
 		while(ls.getLightValue() < BLACK_LINE && stage==3){
 			thetaZ = odo.getTheta();
 		}
+		RConsole.println("fourthline");
 		thetaX = thetaZ - thetaX;
 		
 		//calculate position
 		distX = -CENTER_ROTATION*Math.sin(Math.toRadians(thetaY/2));
 		distY = -CENTER_ROTATION*Math.sin(Math.toRadians(thetaX/2));
 		
+		RConsole.println("found distances");
 		deltaTheta = 270+thetaY/2; //formula to calculate correct heading
 		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
 		
+		RConsole.println("setnewposition");
 		//odo.setPosition(new double [] {0.0, 0.0, 0.0 }, new boolean [] {true, true, true});
 		/*while(line < 4){
 			robot.setRotationSpeed(ROTATION_SPEED);
