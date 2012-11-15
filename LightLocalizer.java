@@ -35,7 +35,7 @@ public class LightLocalizer {
 		
 		
 		//drive to the location listed in the tutorial
-		navigation.travelTo(-5,-5);
+		navigation.turnTo(90);
 		
 		robot.setRotationSpeed(-ROTATION_SPEED);
 		
