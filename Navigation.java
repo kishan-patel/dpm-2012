@@ -11,12 +11,19 @@ public class Navigation {
 	
 	private final double DISTANCE_ERROR_WHILE_TRAVELLING = 1;
 	
+	/**Speed of the motors when the robot is traveling forward.*/
+	private final static int FWD_SPEED = 10;
+	
+	/**This number specifies how frequently correction should be done while traveling towards the light source.*/
+	private final static int UPDATE_HEADING_PERIOD = 3000;
+	
 	/**Dimension of a tile*/
-	private final double TILE_DIM = 30.48;
+	private final double TILE_DIM = 20.48;
 	
 	/**Dimension of half a tile*/
 	private final double HALF_TILE_DIM = 15.24;
 	
+	private final double MIN_DIS_TO_LS = 30.38;
 	/**The rotation speed.*/
 	private int ROTATION_SPEED = 15;
 	
@@ -103,6 +110,39 @@ public class Navigation {
 			}
 		}while((xDestTile-nextXTile)!=0||(yDestTile-nextYTile)!=0);
 		
+		robot.setForwardSpeed(0.0);
+	}
+	
+	/**
+	 * This method is called once a light source is located and causes the robot to travel towards it.
+	 * While traveling towards the light source, it periodically attempts to correct the heading
+	 * of the robot so that the final position of the robot is within 30 degrees of the light 
+	 * source.
+	 */
+	public void navigateTowardsLightSource(int distanceToStopAt) {
+		long start, end;//Used to keep track of when to apply the correction.
+		int distanceToLightSource = usSensor.getDistance();
+		start = System.currentTimeMillis();
+		
+		while (distanceToLightSource >= distanceToStopAt) {
+			robot.setRotationSpeed(0.0);
+			robot.setForwardSpeed(FWD_SPEED);
+			distanceToLightSource = usSensor.getDistance();
+			RConsole.println("Distance to light source: "
+					+ distanceToLightSource);
+			end = System.currentTimeMillis();
+			try {//The period for the correction is specified by UPDATE_HEADING_PERIOD.
+				if (end - start > UPDATE_HEADING_PERIOD) {
+					fieldScanner.locateBeacon();
+					fieldScanner.turnToBeacon();
+					start = System.currentTimeMillis();
+				} else {
+					Thread.sleep(10);
+				}
+			} catch (InterruptedException e) {
+
+			}
+		}
 		robot.setForwardSpeed(0.0);
 	}
 	

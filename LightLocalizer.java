@@ -8,7 +8,7 @@ public class LightLocalizer {
 	private LightSensor ls;
 	private double ROTATION_SPEED = 20;
 	public double CENTER_ROTATION = 10.5;
-	public double BLACK_LINE = 42;
+	public double BLACK_LINE = 40;
 	
 	private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
 	
@@ -31,7 +31,7 @@ public class LightLocalizer {
 		double[] position = new double[3];
 		double[] lineCrossings = new double [4];
 		Navigation navigation = Navigation.getNavigation(odo);
-		
+		int lightValue;
 		
 		//drive to the location listed in the tutorial
 		navigation.turnTo(90);
@@ -39,36 +39,44 @@ public class LightLocalizer {
 		try{Thread.sleep(2000);}catch(InterruptedException e) {}
 		
 		robot.setRotationSpeed(-ROTATION_SPEED);
+		robot.setRotationSpeed(-ROTATION_SPEED);
 		
 		//when first line is crossed, grab heading value from odometer
-		if(ls.getLightValue() < BLACK_LINE){
-			thetaY = odo.getTheta();
+		while((lightValue=ls.getLightValue()) > BLACK_LINE){
+			RConsole.println("LV 1: "+lightValue);
 		}
-		try{Thread.sleep(500);}catch(InterruptedException e) {}
 		
+		thetaY = odo.getTheta();
+		try{Thread.sleep(1000);}catch(InterruptedException e) {}
 		RConsole.println("firstline");
-		//when second line crossed, grab heading value from odometer
-		if(ls.getLightValue() < BLACK_LINE ){
-			thetaX = odo.getTheta();
-		}	
-		try{Thread.sleep(500);}catch(InterruptedException e) {}
 		
+		//when second line crossed, grab heading value from odometer
+		while((lightValue=ls.getLightValue()) > BLACK_LINE ){
+			RConsole.println("LV 2: "+lightValue);
+		}	
+		
+		thetaX = odo.getTheta();
+		try{Thread.sleep(1000);}catch(InterruptedException e) {}
 		RConsole.println("secondline");
+		
 		//when third line crossed, update thetaY value
-		if(ls.getLightValue() < BLACK_LINE){
-			thetaZ = odo.getTheta();
+		while((lightValue=ls.getLightValue()) > BLACK_LINE){
+			RConsole.println("LV 3: "+lightValue);
 		}
-		try{Thread.sleep(500);}catch(InterruptedException e) {}
+		thetaZ = odo.getTheta();
+		try{Thread.sleep(1000);}catch(InterruptedException e) {}
 		thetaY = thetaZ - thetaY;
 		RConsole.println("thirdline");
 		
 		//when fourth line crossed, update thetaX value
-		if(ls.getLightValue() < BLACK_LINE){
-			thetaZ = odo.getTheta();
+		while((lightValue=ls.getLightValue()) > BLACK_LINE){
+			RConsole.println("LV 4: "+lightValue);
 		}
-		try{Thread.sleep(500);}catch(InterruptedException e) {}
-		RConsole.println("fourthline");
+		
+		thetaZ = odo.getTheta();
+		try{Thread.sleep(1000);}catch(InterruptedException e) {}
 		thetaX = thetaZ - thetaX;
+		RConsole.println("fourthline");
 		
 		//calculate position
 		distX = -CENTER_ROTATION*Math.sin(Math.toRadians(thetaY/2));
@@ -78,7 +86,7 @@ public class LightLocalizer {
 		deltaTheta = 270+thetaY/2; //formula to calculate correct heading
 		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
 		
-		RConsole.println("setnewposition");
+		RConsole.println("set new position");
 		//odo.setPosition(new double [] {0.0, 0.0, 0.0 }, new boolean [] {true, true, true});
 		/*while(line < 4){
 			robot.setRotationSpeed(ROTATION_SPEED);
@@ -96,12 +104,11 @@ public class LightLocalizer {
 		}
 		*/
 		robot.setRotationSpeed(0);
-	
+		robot.setRotationSpeed(0);
 		
 				
 		// when done travel to (0,0) and turn to 0 degrees
 		navigation.travelTo(0, 0); 
-		navigation.turnTo(0);
 	}
 
 }

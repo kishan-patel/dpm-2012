@@ -171,6 +171,9 @@ public class MainSlave {
 	
 		
 
+	}catch(Exception e){
+		
+	}
 	}
 }
 
