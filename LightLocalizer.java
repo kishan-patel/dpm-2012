@@ -11,7 +11,6 @@ public class LightLocalizer {
 	public double BLACK_LINE = 42;
 	
 	private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
-	private int stage;
 	
 	public LightLocalizer(Odometer odo, LightSensor ls) {
 		this.odo = odo;
@@ -42,30 +41,32 @@ public class LightLocalizer {
 		robot.setRotationSpeed(-ROTATION_SPEED);
 		
 		//when first line is crossed, grab heading value from odometer
-		while(ls.getLightValue() < BLACK_LINE && stage==0){
+		if(ls.getLightValue() < BLACK_LINE){
 			thetaY = odo.getTheta();
-			try{Thread.sleep(500);}catch(InterruptedException e) {}
-		} stage++;
+		}
+		try{Thread.sleep(500);}catch(InterruptedException e) {}
+		
 		RConsole.println("firstline");
 		//when second line crossed, grab heading value from odometer
-		while(ls.getLightValue() < BLACK_LINE && stage==1){
+		if(ls.getLightValue() < BLACK_LINE ){
 			thetaX = odo.getTheta();
-			try{Thread.sleep(500);}catch(InterruptedException e) {}
-		} stage++;
+		}	
+		try{Thread.sleep(500);}catch(InterruptedException e) {}
+		
 		RConsole.println("secondline");
 		//when third line crossed, update thetaY value
-		while(ls.getLightValue() < BLACK_LINE && stage==2){
+		if(ls.getLightValue() < BLACK_LINE){
 			thetaZ = odo.getTheta();
-			try{Thread.sleep(500);}catch(InterruptedException e) {}
-		} 
-		thetaY = thetaZ - thetaY;
-		stage++;
-		RConsole.println("thirdline");
-		//when fourth line crossed, update thetaX value
-		while(ls.getLightValue() < BLACK_LINE && stage==3){
-			thetaZ = odo.getTheta();
-			try{Thread.sleep(500);}catch(InterruptedException e) {}
 		}
+		try{Thread.sleep(500);}catch(InterruptedException e) {}
+		thetaY = thetaZ - thetaY;
+		RConsole.println("thirdline");
+		
+		//when fourth line crossed, update thetaX value
+		if(ls.getLightValue() < BLACK_LINE){
+			thetaZ = odo.getTheta();
+		}
+		try{Thread.sleep(500);}catch(InterruptedException e) {}
 		RConsole.println("fourthline");
 		thetaX = thetaZ - thetaX;
 		
