@@ -7,7 +7,7 @@ public class LightLocalizer {
 	private TwoWheeledRobot robot;
 	private LightSensor ls;
 	private double ROTATION_SPEED = 20;
-	public double CENTER_ROTATION = 17.5;
+	public double CENTER_ROTATION = 2.0;
 	public double BLACK_LINE = 40;
 	
 	private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
@@ -34,10 +34,6 @@ public class LightLocalizer {
 		int lightValue;
 		
 		//drive to the location listed in the tutorial
-		navigation.turnTo(90);
-		
-		try{Thread.sleep(2000);}catch(InterruptedException e) {}
-		
 		robot.setRotationSpeed(-ROTATION_SPEED);
 		robot.setRotationSpeed(-ROTATION_SPEED);
 		
@@ -94,28 +90,14 @@ public class LightLocalizer {
 		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
 		
 		RConsole.println("set new position");
+		navigation.travelTo(0.0, 0.0);
 		//odo.setPosition(new double [] {0.0, 0.0, 0.0 }, new boolean [] {true, true, true});
-		/*while(line < 4){
-			robot.setRotationSpeed(ROTATION_SPEED);
-			if(ls.getLightValue() < BLACK_LINE){
-				count++;
-			}else{
-				count = 0;
-			}
-			if(count == 2){
-				odo.getPosition(position);
-				lineCrossings[line] = position[2];
-				line++;
-				Sound.beep();
-			}
-		}
-		*/
+		
 		robot.setRotationSpeed(0);
 		robot.setRotationSpeed(0);
 		
 				
-		// when done travel to (0,0)
-		navigation.travelTo(0, 0); 
+		// when done travel to (0,0) 
 		
 		try{Thread.sleep(15000);}catch(InterruptedException e) {}
 	}
