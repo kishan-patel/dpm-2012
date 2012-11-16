@@ -34,10 +34,6 @@ public class LightLocalizer {
 		int lightValue;
 		
 		//drive to the location listed in the tutorial
-		navigation.turnTo(90);
-		
-		try{Thread.sleep(2000);}catch(InterruptedException e) {}
-		
 		robot.setRotationSpeed(-ROTATION_SPEED);
 		robot.setRotationSpeed(-ROTATION_SPEED);
 		
@@ -114,8 +110,7 @@ public class LightLocalizer {
 		robot.setRotationSpeed(0);
 		
 				
-		// when done travel to (0,0)
-		navigation.travelTo(0, 0); 
+		// when done travel to (0,0) 
 		
 		try{Thread.sleep(15000);}catch(InterruptedException e) {}
 	}
