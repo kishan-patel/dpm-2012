@@ -6,7 +6,9 @@ public class SearchAlgorithm {
 	private final int ANGLE_ERROR = 2;
 	private int[][] fieldInfo = new int[20][20];
 	private static SearchAlgorithm searchAlgorithm = null;
-	private final double[][] searchLocations = {{0.0,0.0},{60.0,0.0},{60.0,60.0},{0.0,60.0}};
+	//private final double[][] searchLocations = {{0.0,0.0},{90.0,0.0},{120.0,0.0},{120.0,90.0},{120.0,120.0},{90.0,120.0},{0.0,120.0},{0.0,90.0}};
+	private final double[][] searchLocations = {{0.0,0.0},{30.0,30.0},{90.0,30.0},{150.0,30.0},{150.0,90.0},{150.0,150.0},{90.0,150.0},{30.0,150.0},{30.0,90.0},{30.0,30.0}};
+	//private final double[][] searchLocations = {{0.0,0.0},{30.0,0.0},{60.0,0.0},{60.0,30.0},{60.0,60.0},{30.0,60.0},{0.0,60.0},{0.0,30.0}};
 	private int searchLocationIndex = 1;
 	private double[] nextCoords = new double[2];
 	

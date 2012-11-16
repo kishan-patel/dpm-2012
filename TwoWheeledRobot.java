@@ -106,4 +106,10 @@ public class TwoWheeledRobot {
 		else
 			rightMotor.setSpeed((int)rightSpeed);
 	}
+	
+	public void distanceToRotate(int distance){
+		// drive forward two tiles
+		leftMotor.rotate(distance, true);
+		rightMotor.rotate(distance, false);
+	}
 }

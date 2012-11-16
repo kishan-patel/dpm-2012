@@ -7,7 +7,7 @@ import lejos.util.TimerListener;
 
 public class FieldScanner implements TimerListener {
 	/** This number represents the intensity of the light source. */
-	private final static int MIN_LIGHT_INTENSITY = 30;
+	private final static int MIN_LIGHT_INTENSITY = 32;
 	
 	/**The tolerance allowed in the angle reading*/
 	private final int ANGLE_TOLERANCE = 2;
@@ -127,7 +127,9 @@ public class FieldScanner implements TimerListener {
 	 * @return A boolean value indicating whether the beacon was located.
 	 */
 	public boolean beaconLocated() {
+		RConsole.println("Max light reading is: "+maxLightReading);
 		if (maxLightReading > MIN_LIGHT_INTENSITY) {
+			RConsole.println("Beacon detected is true.");
 			return true;
 		}
 
@@ -138,6 +140,7 @@ public class FieldScanner implements TimerListener {
 	 * This method is called when the beacon is located. It orients the robot towards the beacon.
 	 */
 	public void turnToBeacon() {
+		RConsole.println("Turning to angle of max-light reading: "+angleOfMaxLightReading);
 		nav.turnTo(angleOfMaxLightReading);
 	}
 

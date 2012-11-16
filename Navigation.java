@@ -25,7 +25,7 @@ public class Navigation {
 	
 	private final double MIN_DIS_TO_LS = 30.38;
 	/**The rotation speed.*/
-	private int ROTATION_SPEED = 15;
+	private int ROTATION_SPEED = 20;
 	
 	/**The forward speed.*/
 	private static double FORWARD_SPEED = 8;
@@ -45,6 +45,8 @@ public class Navigation {
 	/**US sensor used to avoid obstacles*/
 	private USSensor usSensor;
 	
+	private USSensor beaconUSSensor;
+	
 	/**Holds information about the tiles in the field.*/
 	private FieldScanner fieldScanner;
 	
@@ -58,6 +60,7 @@ public class Navigation {
 		this.robot = odo.getTwoWheeledRobot();
 		this.searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
 		this.usSensor = SensorAndMotorInfo.getUsSensor();
+		this.beaconUSSensor = SensorAndMotorInfo.BEACON_US_SENSOR;
 		this.fieldScanner = FieldScanner.getFieldScanner(odo);
 		this.fieldScanner.setNavigation(this);
 	}
@@ -73,9 +76,10 @@ public class Navigation {
 	/**
 	 * Robot moves forward at the present heading.
 	 */
-	public void goStraight(){
-		robot.setRotationSpeed(0.0);
-		robot.setForwardSpeed(FORWARD_SPEED);
+	public void goStraight(int distance){
+		robot.setForwardSpeed(FWD_SPEED);
+		robot.setForwardSpeed(FWD_SPEED);
+		robot.distanceToRotate(convertDistance(TwoWheeledRobot.DEFAULT_LEFT_RADIUS, distance));
 	}
 	
 	/**
@@ -121,13 +125,19 @@ public class Navigation {
 	 */
 	public void navigateTowardsLightSource(int distanceToStopAt) {
 		long start, end;//Used to keep track of when to apply the correction.
-		int distanceToLightSource = usSensor.getDistance();
+		int distanceToLightSource = beaconUSSensor.getDistance();
 		start = System.currentTimeMillis();
+		int noOfObjectDetections=0;
 		
-		while (distanceToLightSource >= distanceToStopAt) {
+		while (distanceToLightSource >= distanceToStopAt||noOfObjectDetections<=5) {
 			robot.setRotationSpeed(0.0);
 			robot.setForwardSpeed(FWD_SPEED);
-			distanceToLightSource = usSensor.getDistance();
+			distanceToLightSource = beaconUSSensor.getDistance();
+			if(distanceToLightSource<=distanceToStopAt){
+				noOfObjectDetections++;
+			}else{
+				noOfObjectDetections=0;
+			}
 			RConsole.println("Distance to light source: "
 					+ distanceToLightSource);
 			end = System.currentTimeMillis();
@@ -320,5 +330,9 @@ public class Navigation {
 		
 		//Stop the rotation
 		robot.setRotationSpeed(0.0);
+	}
+	
+	private static int convertDistance(double radius, double distance) {
+		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 }

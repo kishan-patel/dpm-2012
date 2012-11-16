@@ -1,5 +1,6 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
@@ -20,14 +21,16 @@ public class MainMaster {
 	private static Transmission t;
 	private static StartCorner corner;
 	private static PlayerRole role;
-	private static int dx,dy;
+	private static int dx=10,dy=10;
 	
 	//Variables used for communication with slave.
 	private static NXTConnection connectionToSlave;
 	private static DataInputStream dis;
 	private static DataOutputStream dos;
-	private static int OPEN = -1;
-	private static int GROUND_HEIGHT = 0;
+	public static final int CLOSE_CLAW = 0;
+	public static final int OPEN_CLAW = 1;
+	public static final int LOWER_CLAW_TO_FLOOR = 2;
+	public static final int MOVE_CLAW_UP = 3;
 	
 	//Variables used for by the attacker/defender.
 	private static USSensor usSensor;
@@ -42,8 +45,8 @@ public class MainMaster {
 	
 	public static void main(String[] args){
 		//connectToBTServer();
-		//connectToSlave();
-		RConsole.openBluetooth(5000);
+		connectToSlave();
+		//RConsole.openBluetooth(5000);
 		int buttonChoice;
 		LCD.clear();
 		do{
@@ -54,46 +57,88 @@ public class MainMaster {
 
 		if(buttonChoice == Button.ID_LEFT){
 			//Defender code
-			LightSensor ls = SensorAndMotorInfo.getRightLightSensor();
-			while(true){
-				RConsole.println("LV: "+ls.getLightValue());
-				try{Thread.sleep(100);}catch(InterruptedException e){}
+		//	LightSensor ls = SensorAndMotorInfo.getBeaconFinderLightSensor();
+			//while(true){
+				//RConsole.println("light value: "+ls.getLightValue());
+			//	try{Thread.sleep(100);}catch(InterruptedException e){}
+				//RConsole.println("normalized light value: "+ls.getNormalizedLightValue());
+			//	try{Thread.sleep(100);}catch(InterruptedException e){}
+				//RConsole.println("Read value: "+ls.readValue());
+				//try{Thread.sleep(100);}catch(InterruptedException e){}
+				//RConsole.println("Read normalized value: "+ls.readNormalizedValue());
+				//try{Thread.sleep(100);}catch(InterruptedException e){}
 				
-			}
+		//	}
+			
+			
 			
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			findAndGoToBeacon();
-			/*try{
-				dos.writeInt(OPEN);
+		try{
+//				dos.writeInt(OPEN);
+//				dos.flush();
+//				LCD.drawString("Sent open instruc.",0,2);
+//				while(dis.available()<=0){
+//					Thread.sleep(10);
+//				}
+//				dis.readBoolean();
+//				LCD.drawString("Got open conf.", 0, 2);
+//				dos.writeInt(GROUND_HEIGHT);
+//				dos.flush();
+//				while(dis.available()<=0){
+//					Thread.sleep(10);
+//				}
+//				dis.readBoolean();
+//				nav.traveToUsingSearchAlgo(dx, dy);
+				dos.writeInt(LOWER_CLAW_TO_FLOOR);
 				dos.flush();
-				LCD.drawString("Sent open instruc.",0,2);
 				while(dis.available()<=0){
 					Thread.sleep(10);
 				}
 				dis.readBoolean();
-				LCD.drawString("Got open conf.", 0, 2);
-				dos.writeInt(GROUND_HEIGHT);
+				Thread.sleep(2000);
+				
+				dos.writeInt(CLOSE_CLAW);
 				dos.flush();
 				while(dis.available()<=0){
 					Thread.sleep(10);
 				}
 				dis.readBoolean();
-				nav.traveToUsingSearchAlgo(dx, dy);
-			}catch(IOException e){
+				Thread.sleep(4000);
 				
-			}catch(InterruptedException e){
+				dos.writeInt(MOVE_CLAW_UP);
+				dos.flush();
+				while(dis.available()<=0){
+					Thread.sleep(10);
+				}
+				dis.readBoolean();
+				Thread.sleep(4000);
 				
-			}*/
+				dis.close();
+				dos.close();
+				nav.turn360();
+				
+		}catch(InterruptedException e){	nav.turn360();}
+		catch( IOException e){	nav.turn360();
+		}catch(Exception e){	nav.turn360();
 			
-			
+		}finally{
+			nav.turn360();
 		}
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+		try {
+			dos.close();
+			dis.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		RConsole.close();
 		System.exit(0);
 	}
-	
+	}
 	public static void connectToBTServer(){
 		conn = new BluetoothConnection();
 		t = conn.getTransmission();
@@ -136,12 +181,12 @@ public class MainMaster {
 		int distToBeacon;
 		double[] position = new double[3];
 		/*Process of steps that are executed in order to find the beacon and travel to it.*/
-		//usl.doLocalization();
-		//try{Thread.sleep(5000);}catch(InterruptedException e){}
-		ls.doLocalization();
-		
-		
-		/*while(!beaconFound){
+		usl.doLocalization();
+		try{Thread.sleep(5000);}catch(InterruptedException e){}
+		//ls.doLocalization();
+		//nav.goStraight(45);
+		int count = 0;
+		while(!beaconFound){
 			fieldScanner.locateBeacon();
 			
 			if(!fieldScanner.beaconLocated()){
@@ -158,7 +203,7 @@ public class MainMaster {
 			}else{
 				//The beacon has been located so we use the search algorithm to get the next point
 				//that will move the robot closer to the beacon.
-				isBeaconDetectedByUS = fieldScanner.isBeaconDetectedByUS();
+				/*isBeaconDetectedByUS = fieldScanner.isBeaconDetectedByUS();
 				if(isBeaconDetectedByUS){
 					distToBeacon = fieldScanner.getDistanceToBeacon();
 				}else{
@@ -176,14 +221,22 @@ public class MainMaster {
 					RConsole.println("Next y: "+nextSearchLocation[1]);
 					nav.traveToUsingSearchAlgo(nextSearchLocation[0], nextSearchLocation[1]);
 					
-				} 
+				} */
 				
-				nav.navigateTowardsLightSource(20);
+				fieldScanner.turnToBeacon();
+				RConsole.println("Beacon located. turned to it. Headed towards it.");
+				nav.navigateTowardsLightSource(30);
+				fieldScanner.locateBeacon();
+				fieldScanner.turnToBeacon();
+				RConsole.println("Turing 10 degrees CCW");
 				nav.turnTo(odo.getTheta()-15.0);
-				nav.navigateTowardsLightSource(5);
+				RConsole.println("Moving 10 cm forward");
+				nav.goStraight(25);
 				beaconFound = true;
 				break;
 			} 
-		}*/
+		}
+		
+		RConsole.println("Done finding beacon - leaving it to the claw now.");
 	}
 }

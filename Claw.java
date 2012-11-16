@@ -13,8 +13,8 @@ public class Claw {
 	public final static int pulleyHeight = 2;
 	private final int pulleySpeed = 100;
 	private final static double ONE_ROTATION = 8.4;
-	private final int clawSpeed = 10;	
-	private final int noOfRotsClaw = 80;	
+	private final int clawSpeed = 50;	
+	private final int noOfRotsClaw = 90;	
 	static final int stop = 0;
 
 	private NXTRegulatedMotor clawMotor;
@@ -33,7 +33,7 @@ public class Claw {
 	this.clawMotor = clawMotor;
 	this.pulleyMotor = pulleyMotor;
 	this.pulleyMotor2 = pulleyMotor2;
-	this.open = false;
+	this.open = true;
 	this.currentHeight = pulleyHeight;
 
 	}
@@ -58,6 +58,16 @@ public class Claw {
 					
 					moveClaw(noOfRotsPulley);
 									
+	}
+	
+	public void moveToGround(){
+		int noOfRots = (int)(-150);
+		moveClaw(noOfRots);
+	}
+	
+	public void moveOffGround(){
+		int noOfRots = (int)(360);
+		moveClaw(noOfRots);
 	}
 	
 	/**
