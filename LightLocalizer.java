@@ -7,7 +7,7 @@ public class LightLocalizer {
 	private TwoWheeledRobot robot;
 	private LightSensor ls;
 	private double ROTATION_SPEED = 20;
-	public double CENTER_ROTATION = 10.5;
+	public double CENTER_ROTATION = 17.5;
 	public double BLACK_LINE = 40;
 	
 	private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
@@ -77,13 +77,20 @@ public class LightLocalizer {
 		try{Thread.sleep(1000);}catch(InterruptedException e) {}
 		thetaX = thetaZ - thetaX;
 		RConsole.println("fourthline");
-		
+		RConsole.println("thetaY: "+thetaY);
+		RConsole.println("thetaX: "+thetaX);
 		//calculate position
 		distX = -CENTER_ROTATION*Math.sin(Math.toRadians(thetaY/2));
 		distY = -CENTER_ROTATION*Math.sin(Math.toRadians(thetaX/2));
 		
+		RConsole.println("distY: "+distY);
+		RConsole.println("distX: "+distX);
+		
 		RConsole.println("found distances");
 		deltaTheta = 270+thetaY/2; //formula to calculate correct heading
+		
+		RConsole.println("deltaTheta: "+ deltaTheta);
+		
 		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
 		
 		RConsole.println("set new position");
@@ -107,8 +114,10 @@ public class LightLocalizer {
 		robot.setRotationSpeed(0);
 		
 				
-		// when done travel to (0,0) and turn to 0 degrees
+		// when done travel to (0,0)
 		navigation.travelTo(0, 0); 
+		
+		try{Thread.sleep(15000);}catch(InterruptedException e) {}
 	}
 
 }
