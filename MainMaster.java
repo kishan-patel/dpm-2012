@@ -114,17 +114,21 @@ public class MainMaster {
 				}
 				dis.readBoolean();
 				Thread.sleep(4000);
-				
-				dis.close();
+				/*dis.close();
 				dos.close();
-				nav.turn360();
+				connectionToSlave.close();*/
+				//nav = Navigation.getNavigation(odo);
+				nav.travelTo(dx,dy);
+				while(true){
+					Thread.sleep(30);
+				}
 				
-		}catch(InterruptedException e){	nav.turn360();}
-		catch( IOException e){	nav.turn360();
-		}catch(Exception e){	nav.turn360();
+		}catch(InterruptedException e){	nav.travelTo(dx,dy);}
+		catch( IOException e){	nav.travelTo(dx,dy);
+		}catch(Exception e){	nav.travelTo(dx,dy);
 			
 		}finally{
-			nav.turn360();
+			nav.travelTo(dx,dy);
 		}
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
@@ -166,14 +170,14 @@ public class MainMaster {
 	
 	public static void findAndGoToBeacon(){
 		//Variables used for attacking/defending.
-		USSensor usSensor = SensorAndMotorInfo.getUsSensor();
-		TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);
-		Odometer odo = new Odometer(patBot,true);
-		LCDInfo lcd = new LCDInfo(odo);
-		Navigation nav = Navigation.getNavigation(odo);
-		FieldScanner fieldScanner = FieldScanner.getFieldScanner(odo);
-		SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
-		USLocalizer usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
+		 usSensor = SensorAndMotorInfo.getUsSensor();
+		 patBot = new TwoWheeledRobot(Motor.A, Motor.B);
+		 odo = new Odometer(patBot,true);
+		 lcd = new LCDInfo(odo);
+		 nav = Navigation.getNavigation(odo);
+		 fieldScanner = FieldScanner.getFieldScanner(odo);
+		 searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
+		 usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
 		LightLocalizer ls = new LightLocalizer(odo,SensorAndMotorInfo.RIGHT_LIGHT_SENSOR);
 		boolean beaconFound = false;
 		double[] nextSearchLocation;
