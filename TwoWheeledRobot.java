@@ -1,11 +1,11 @@
 import lejos.nxt.NXTRegulatedMotor;
 
 public class TwoWheeledRobot {
-	/*public static final double DEFAULT_LEFT_RADIUS = 2.50;
-	public static final double DEFAULT_RIGHT_RADIUS = 2.50;
-	public static final double DEFAULT_WIDTH = 18;*/
-	public static final double DEFAULT_LEFT_RADIUS = 2.60;
-	public static final double DEFAULT_RIGHT_RADIUS = 2.60;
+	/*public static final double DEFAULT_LEFT_RADIUS = 2.65;
+	public static final double DEFAULT_RIGHT_RADIUS = 2.65;
+	public static final double DEFAULT_WIDTH = 19;*/
+	public static final double DEFAULT_LEFT_RADIUS = 2.65;
+	public static final double DEFAULT_RIGHT_RADIUS = 2.67;
 	public static final double DEFAULT_WIDTH = 19;
 	private NXTRegulatedMotor leftMotor, rightMotor;
 	private double leftRadius, rightRadius, width;
@@ -45,8 +45,8 @@ public class TwoWheeledRobot {
 	
 	public void getDisplacementAndHeading(double [] data) {
 		int leftTacho, rightTacho;
-		leftTacho = leftMotor.getTachoCount();
-		rightTacho = rightMotor.getTachoCount();
+		leftTacho = -1*leftMotor.getTachoCount();
+		rightTacho = -1*rightMotor.getTachoCount();
 		
 		data[0] = (leftTacho * leftRadius + rightTacho * rightRadius) *	Math.PI / 360.0;
 		data[1] = (leftTacho * leftRadius - rightTacho * rightRadius) / width;
@@ -84,17 +84,25 @@ public class TwoWheeledRobot {
 				180.0 / (rightRadius * Math.PI);
 
 		// set motor directions
-		if (leftSpeed > 0.0)
-			leftMotor.forward();
-		else {
+		if (leftSpeed > 0.0){
+			//leftMotor.forward();
 			leftMotor.backward();
+			}
+		else {
+			//leftMotor.backward();
+			//leftSpeed = -leftSpeed;
+			leftMotor.forward();
 			leftSpeed = -leftSpeed;
 		}
 		
-		if (rightSpeed > 0.0)
-			rightMotor.forward();
-		else {
+		if (rightSpeed > 0.0){
+			//rightMotor.forward();
 			rightMotor.backward();
+			}
+		else {
+			/*rightMotor.backward();
+			rightSpeed = -rightSpeed;*/
+			rightMotor.forward();
 			rightSpeed = -rightSpeed;
 		}
 		

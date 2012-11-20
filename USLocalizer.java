@@ -11,7 +11,7 @@ public class USLocalizer {
 	/**Value used for the rising_edge.*/
 	public static int TRESH_HOLD = 7;
 	/**Specifies the distance to the wall the confirms it has been detected.*/
-	public static int WALL_DIST = 60;
+	public static int WALL_DIST = 40;
 	/**The noise margin.*/
 	public static int NOISE = 1;
 	/**Used to control the forward motion and rotation of the robot.*/
@@ -53,7 +53,7 @@ public class USLocalizer {
 		int distance;
 		if (locType == LocalizationType.FALLING_EDGE) {
 			// rotate the robot until it sees no wall
-			while((distance=getFilteredData()) <= WALL_DIST||noObjDetectCount<10){
+			while((distance=getFilteredData()) <= WALL_DIST||noObjDetectCount<5){
 				RConsole.println(""+distance);
 				RConsole.println("no obj. detect count: "+noObjDetectCount);
 				robot.setRotationSpeed(ROTATION_SPEED);
@@ -62,13 +62,13 @@ public class USLocalizer {
 			
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
-			while((distance=getFilteredData())>WALL_DIST + NOISE||objDetectCount<10){
+			while((distance=getFilteredData())>WALL_DIST + NOISE||objDetectCount<5){
 				RConsole.println(""+distance);
 				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(ROTATION_SPEED);
 			}
 			odo.getPosition(noisePos);	
-			while((distance=getFilteredData())>=WALL_DIST - NOISE||objDetectCount<10){
+			while((distance=getFilteredData())>=WALL_DIST - NOISE||objDetectCount<5){
 				RConsole.println(""+distance);
 				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(ROTATION_SPEED);
@@ -79,7 +79,7 @@ public class USLocalizer {
 			RConsole.println("Robot saw a wall withing the noise margin");
 			
 			// switch direction and wait until it sees no wall
-			while((distance=getFilteredData())<WALL_DIST||noObjDetectCount<10){
+			while((distance=getFilteredData())<WALL_DIST||noObjDetectCount<5){
 				RConsole.println(""+distance);
 				RConsole.println("no obj. detect count: "+noObjDetectCount);
 				robot.setRotationSpeed(-ROTATION_SPEED);
@@ -88,13 +88,13 @@ public class USLocalizer {
 			
 			// keep rotating until the robot sees a wall, then latch the angle. First outside the noise
 			// margin, then inside.
-			while((distance=getFilteredData())>WALL_DIST+NOISE||objDetectCount<10){
+			while((distance=getFilteredData())>WALL_DIST+NOISE||objDetectCount<5){
 				RConsole.println(""+distance);
 				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(-ROTATION_SPEED);
 			}
 			odo.getPosition(noisePos);
-			while((distance=getFilteredData())>=WALL_DIST-NOISE||objDetectCount<10){
+			while((distance=getFilteredData())>=WALL_DIST-NOISE||objDetectCount<5){
 				RConsole.println(""+distance);
 				RConsole.println("obj. detect count: "+objDetectCount);
 				robot.setRotationSpeed(-ROTATION_SPEED);

@@ -45,7 +45,6 @@ public class Navigation {
 	/**US sensor used to avoid obstacles*/
 	private USSensor usSensor;
 	
-	private USSensor beaconUSSensor;
 	
 	/**Holds information about the tiles in the field.*/
 	private FieldScanner fieldScanner;
@@ -59,8 +58,7 @@ public class Navigation {
 		this.odo = odo;
 		this.robot = odo.getTwoWheeledRobot();
 		this.searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
-		this.usSensor = SensorAndMotorInfo.getUsSensor();
-		this.beaconUSSensor = SensorAndMotorInfo.BEACON_US_SENSOR;
+		this.usSensor = SensorAndMotorInfo.US_SENSOR;
 		this.fieldScanner = FieldScanner.getFieldScanner(odo);
 		this.fieldScanner.setNavigation(this);
 	}
@@ -125,14 +123,14 @@ public class Navigation {
 	 */
 	public void navigateTowardsLightSource(int distanceToStopAt) {
 		long start, end;//Used to keep track of when to apply the correction.
-		int distanceToLightSource = beaconUSSensor.getDistance();
+		int distanceToLightSource = usSensor.getDistance();
 		start = System.currentTimeMillis();
 		int noOfObjectDetections=0;
 		
 		while (distanceToLightSource >= distanceToStopAt||noOfObjectDetections<=5) {
 			robot.setRotationSpeed(0.0);
 			robot.setForwardSpeed(FWD_SPEED);
-			distanceToLightSource = beaconUSSensor.getDistance();
+			distanceToLightSource = usSensor.getDistance();
 			if(distanceToLightSource<=distanceToStopAt){
 				noOfObjectDetections++;
 			}else{

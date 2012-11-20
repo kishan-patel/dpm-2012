@@ -14,7 +14,7 @@ public class Claw {
 	private final int pulleySpeed = 100;
 	private final static double ONE_ROTATION = 8.4;
 	private final int clawSpeed = 50;	
-	private final int noOfRotsClaw = 90;	
+	private final int noOfRotsClaw = 200;	
 	static final int stop = 0;
 
 	private NXTRegulatedMotor clawMotor;

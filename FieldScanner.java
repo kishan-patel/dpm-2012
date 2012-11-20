@@ -93,8 +93,8 @@ public class FieldScanner implements TimerListener {
 	 * Constructor
 	 */
 	private FieldScanner(Odometer odo) {
-		this.us = SensorAndMotorInfo.getUsSensor();
-		this.ls = SensorAndMotorInfo.getBeaconFinderLightSensor();
+		this.us = SensorAndMotorInfo.US_SENSOR;
+		this.ls = SensorAndMotorInfo.LS_LOCALISER_SENSOR;
 		this.odo = odo;
 		ls.setFloodlight(false);
 	}
