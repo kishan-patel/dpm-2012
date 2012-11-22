@@ -7,7 +7,7 @@ import lejos.util.TimerListener;
 
 public class FieldScanner implements TimerListener {
 	/** This number represents the intensity of the light source. */
-	private final static int MIN_LIGHT_INTENSITY = 32;
+	private final static int MIN_LIGHT_INTENSITY = 34;
 	
 	/**The tolerance allowed in the angle reading*/
 	private final int ANGLE_TOLERANCE = 2;
@@ -79,6 +79,7 @@ public class FieldScanner implements TimerListener {
 	 */
 	public void timedOut() {
 		currentLightReading = ls.getLightValue();
+		RConsole.println("Current light reading is: "+currentLightReading);
 		if (currentLightReading > maxLightReading) {
 			maxLightReading = currentLightReading;
 			odo.getPosition(pos);
@@ -94,9 +95,9 @@ public class FieldScanner implements TimerListener {
 	 */
 	private FieldScanner(Odometer odo) {
 		this.us = SensorAndMotorInfo.US_SENSOR;
-		this.ls = SensorAndMotorInfo.LS_LOCALISER_SENSOR;
+		this.ls = SensorAndMotorInfo.BEACON_FINDER_LIGHT_SENSOR;
 		this.odo = odo;
-		ls.setFloodlight(false);
+		ls.setFloodlight(true);
 	}
 	
 	/**
@@ -184,30 +185,7 @@ public class FieldScanner implements TimerListener {
 		nav = navigation;
 	}
 	
-	public void markObstacle(int distanceToObstacle){
-		double[] pos = new double[3];
-		odo.getPosition(pos);
-		double currentXDist = pos[0];
-		double currentYDist = pos[1];
-		double currentTheta = pos[2];
-		int[] tiles = new int[2];
-
-		if(Math.abs(Odometer.minimumAngleFromTo(currentTheta, 0))<=ANGLE_TOLERANCE){
-			//Obstacle is in +ve y direction.
-			tiles = nav.convertDistancesToTiles(currentXDist, currentYDist+distanceToObstacle);
-		}else if (Math.abs(Odometer.minimumAngleFromTo(currentTheta, 90))<=ANGLE_TOLERANCE){
-			//Obstacle is in +ve x direction.
-			tiles = nav.convertDistancesToTiles(currentXDist+distanceToObstacle, currentYDist);
-		}else if (Math.abs(Odometer.minimumAngleFromTo(currentTheta, 270))<=ANGLE_TOLERANCE){
-			//Obstacle is in -ve y direction.
-			tiles = nav.convertDistancesToTiles(currentXDist, currentYDist-distanceToObstacle);
-		}else{
-			//Obstacle is in -ve x direction.
-			tiles = nav.convertDistancesToTiles(currentXDist-distanceToObstacle, currentYDist);
-		}
-		
-		fieldInfo[tiles[0]][tiles[1]] = OBSTACLE;
-	}
+	
 	
 	public int[] getCurrentTile(){
 		return currentTile;

@@ -41,6 +41,7 @@ public class MainMaster {
 	private static FieldScanner fieldScanner;
 	private static SearchAlgorithm searchAlgorithm;
 	private static USLocalizer usl;
+	private static OdoCorrection odoCorrection;
 	
 	public static void main(String[] args){
 		//connectToBTServer();
@@ -56,7 +57,7 @@ public class MainMaster {
 
 		if(buttonChoice == Button.ID_LEFT){
 			//Defender code
-			LightSensor ls = SensorAndMotorInfo.LS_LOCALISER_SENSOR;
+			LightSensor ls = SensorAndMotorInfo.LS_LEFT_SENSOR;
 			while(true){
 				RConsole.println("light value: "+ls.getLightValue());
 			//	try{Thread.sleep(100);}catch(InterruptedException e){}
@@ -105,22 +106,6 @@ public class MainMaster {
 //				dis.readBoolean();
 //				Thread.sleep(4000);
 //	
-//				nav.travelTo(0,0);
-//				
-//				dos.writeInt(LOWER_CLAW_TO_FLOOR);
-//				dos.flush();
-//				while(dis.available()<=0){
-//					Thread.sleep(10);
-//				}
-//				dis.readBoolean();
-//				Thread.sleep(4000);
-//				
-//				dos.writeInt(OPEN_CLAW);
-//				dos.flush();
-//				while(dis.available()<=0){
-//					Thread.sleep(10);
-//				}
-//				dis.readBoolean();
 //				
 //				
 //				while(true){
@@ -177,24 +162,30 @@ public class MainMaster {
 		 patBot = new TwoWheeledRobot(Motor.A, Motor.B);
 		 odo = new Odometer(patBot,true);
 		 lcd = new LCDInfo(odo);
+		 odoCorrection = new OdoCorrection(odo);
 		 nav = Navigation.getNavigation(odo);
+		 nav.setOdoCorrection(odoCorrection);
 		 fieldScanner = FieldScanner.getFieldScanner(odo);
 		 searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
 		 usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
-		LightLocalizer ls = new LightLocalizer(odo,SensorAndMotorInfo.LS_LOCALISER_SENSOR);
+		LightLocalizer ls = new LightLocalizer(odo,SensorAndMotorInfo.LS_LEFT_SENSOR);
 		boolean beaconFound = false;
 		double[] nextSearchLocation;
 		boolean isBeaconDetectedByUS = false;
 		int distToBeacon;
 		double[] position = new double[3];
 		/*Process of steps that are executed in order to find the beacon and travel to it.*/
-		usl.doLocalization();
-		try{Thread.sleep(5000);}catch(InterruptedException e){}
-		ls.doLocalization();
+		//usl.doLocalization();
+		//try{Thread.sleep(5000);}catch(InterruptedException e){}
+		//ls.doLocalization();
 		//nav.goStraight(45);
 		int count = 0;
-//		while(!beaconFound){
-//			//fieldScanner.locateBeacon();
+		nav.traveToUsingSearchAlgo(60,0);
+		nav.traveToUsingSearchAlgo(60,60);
+		nav.traveToUsingSearchAlgo(0, 60);
+		nav.traveToUsingSearchAlgo(0, 0);
+		//		while(!beaconFound){
+//			fieldScanner.locateBeacon();
 //			
 //			if(!fieldScanner.beaconLocated()){
 //				//The beacon has not yet been located. Thus, we go to the next position
@@ -236,14 +227,15 @@ public class MainMaster {
 //				fieldScanner.locateBeacon();
 //				fieldScanner.turnToBeacon();
 //				RConsole.println("Turing 10 degrees CCW");
-//				nav.turnTo(odo.getTheta()-15.0);
+//				nav.turnTo(odo.getTheta()-180);
+//				//nav.turnTo(odo.getTheta()-15.0);
 //				RConsole.println("Moving 10 cm forward");
-//				nav.goStraight(25);
+//				nav.goStraight(30);
 //				beaconFound = true;
 //				break;
 //			} 
 //		}
-//		
+		
 		RConsole.println("Done finding beacon - leaving it to the claw now.");
 	}
 }

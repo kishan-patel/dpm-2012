@@ -9,6 +9,7 @@ public class Odometer implements TimerListener {
 	private Object lock;
 	private double x, y, theta;
 	private double [] oldDH, dDH;
+	private static Coordinates coords = new Coordinates();
 	
 	public Odometer(TwoWheeledRobot robot, int period, boolean start) {
 		// initialise variables
@@ -113,4 +114,39 @@ public class Odometer implements TimerListener {
 		else
 			return d - 360.0;
 	}
+	
+	/**
+	 * 
+	 * @param coordsIn
+	 * @param update an array of booleans representing which values are to be updated
+	 */
+	public  void setCoordinates(Coordinates coordsIn , boolean[] update) 
+	{
+		// ensure that the values don't change while the odometer is running
+		synchronized (lock) 
+		{
+			if (update[0])
+				x = coordsIn.x;
+			if (update[1])
+				y = coordsIn.y;
+			if (update[2])
+				theta = coordsIn.theta;
+		}
+	}
+	
+	/**
+	 * @return the coordinates of the robot
+	 */
+	public  Coordinates getCoordinates()
+	{
+		coords = new Coordinates();
+		synchronized (lock) 
+		{		
+			coords.x = x;
+			coords.y = y;
+			coords.theta = theta;
+		}
+		return coords;
+	}
+
 }

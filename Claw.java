@@ -9,13 +9,13 @@ import lejos.nxt.NXTRegulatedMotor;
 
 
 public class Claw {
-	private final int pulleyMotorRadius = 1;
-	public final static int pulleyHeight = 20;
-	private final int pulleySpeed = 100;
+	private final int PULLEY_MOTOR_RADIUS = 1;
+	public final static int PULLEY_HEIGHT = 25;
+	private final int PULLEY_SPEED = 100;
 	private final static double ONE_ROTATION = 8.4;
-	private final int clawSpeed = 50;	
-	private final int noOfRotsClaw = 200;	
-	static final int stop = 0;
+	private final int CLAW_SPEED = 50;	
+	private final int NO_OF_ROTS_CLAW = 200;	
+	static final int STOP = 0;
 
 	private NXTRegulatedMotor clawMotor;
 	private NXTRegulatedMotor pulleyMotor;
@@ -33,8 +33,8 @@ public class Claw {
 	this.clawMotor = clawMotor;
 	this.pulleyMotor = pulleyMotor;
 	this.pulleyMotor2 = pulleyMotor2;
-	this.open = false;
-	this.currentHeight = pulleyHeight;
+	this.open = true;
+	this.currentHeight = PULLEY_HEIGHT;
 
 	}
 	
@@ -61,13 +61,11 @@ public class Claw {
 	}
 	
 	public void moveToGround(){
-		int noOfRots = (int)(-150);
-		moveClaw(noOfRots);
+		moveToHeight(STOP);
 	}
 	
 	public void moveOffGround(){
-		int noOfRots = (int)(360);
-		moveClaw(noOfRots);
+		moveToHeight(PULLEY_HEIGHT);
 	}
 	
 	/**
@@ -85,25 +83,25 @@ public class Claw {
 	}
 
 	private void closeClaw(){
-		clawMotor.setSpeed(clawSpeed);
-		clawMotor.rotate(noOfRotsClaw + 10);
-		clawMotor.setSpeed(stop);
+		clawMotor.setSpeed(CLAW_SPEED);
+		clawMotor.rotate(NO_OF_ROTS_CLAW + 10);
+		clawMotor.setSpeed(STOP);
 	}
 	
 	public void openClaw(){
-		clawMotor.setSpeed(clawSpeed);
-		clawMotor.rotate(-noOfRotsClaw);
-		clawMotor.setSpeed(stop);
+		clawMotor.setSpeed(CLAW_SPEED);
+		clawMotor.rotate(-NO_OF_ROTS_CLAW);
+		clawMotor.setSpeed(STOP);
 		this.open = true;
 	}
 	
 	private void moveClaw(int noOfRotsPulley){
-		pulleyMotor.setSpeed(pulleySpeed);
-		pulleyMotor2.setSpeed(pulleySpeed);	
+		pulleyMotor.setSpeed(PULLEY_SPEED);
+		pulleyMotor2.setSpeed(PULLEY_SPEED);	
 		pulleyMotor.rotate(noOfRotsPulley,true);
 		pulleyMotor2.rotate(noOfRotsPulley);;
-		pulleyMotor.setSpeed(stop);
-		pulleyMotor2.setSpeed(stop);
+		pulleyMotor.setSpeed(STOP);
+		pulleyMotor2.setSpeed(STOP);
 	}
 	
 }

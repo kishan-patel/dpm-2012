@@ -4,12 +4,13 @@ public class TwoWheeledRobot {
 	/*public static final double DEFAULT_LEFT_RADIUS = 2.65;
 	public static final double DEFAULT_RIGHT_RADIUS = 2.65;
 	public static final double DEFAULT_WIDTH = 19;*/
-	public static final double DEFAULT_LEFT_RADIUS = 2.65;
-	public static final double DEFAULT_RIGHT_RADIUS = 2.67;
+	public static final double DEFAULT_LEFT_RADIUS = 2.60;
+	public static final double DEFAULT_RIGHT_RADIUS = 2.64;
 	public static final double DEFAULT_WIDTH = 19;
-	private NXTRegulatedMotor leftMotor, rightMotor;
-	private double leftRadius, rightRadius, width;
-	private double forwardSpeed, rotationSpeed;
+	public static NXTRegulatedMotor leftMotor;
+	public static NXTRegulatedMotor rightMotor;
+	public static double leftRadius, rightRadius, width;
+	public static double forwardSpeed, rotationSpeed;
 	
 	public TwoWheeledRobot(NXTRegulatedMotor leftMotor,
 						   NXTRegulatedMotor rightMotor,
@@ -87,23 +88,25 @@ public class TwoWheeledRobot {
 		if (leftSpeed > 0.0){
 			//leftMotor.forward();
 			leftMotor.backward();
+			leftSpeed = -leftSpeed;
 			}
 		else {
 			//leftMotor.backward();
 			//leftSpeed = -leftSpeed;
 			leftMotor.forward();
-			leftSpeed = -leftSpeed;
+			
 		}
 		
 		if (rightSpeed > 0.0){
 			//rightMotor.forward();
 			rightMotor.backward();
+			rightSpeed = -rightSpeed;
 			}
 		else {
 			/*rightMotor.backward();
 			rightSpeed = -rightSpeed;*/
 			rightMotor.forward();
-			rightSpeed = -rightSpeed;
+			
 		}
 		
 		// set motor speeds

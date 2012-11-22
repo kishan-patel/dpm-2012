@@ -1,4 +1,5 @@
 import lejos.nxt.comm.RConsole;
+import lejos.util.Timer;
 
 
 
@@ -49,6 +50,7 @@ public class Navigation {
 	/**Holds information about the tiles in the field.*/
 	private FieldScanner fieldScanner;
 	
+	private OdoCorrection odoCorrection;
 	private static Navigation navigation = null;
 	
 	/**
@@ -61,6 +63,10 @@ public class Navigation {
 		this.usSensor = SensorAndMotorInfo.US_SENSOR;
 		this.fieldScanner = FieldScanner.getFieldScanner(odo);
 		this.fieldScanner.setNavigation(this);
+	}
+	
+	public void setOdoCorrection(OdoCorrection odoCorrection){
+		this.odoCorrection = odoCorrection;
 	}
 	
 	public static Navigation getNavigation(Odometer odo){
@@ -86,35 +92,7 @@ public class Navigation {
 	public void stopGoingStraight(){
 		robot.setForwardSpeed(0.0);
 	}
-	
-	public void moveToTile(int xDestTile, int yDestTile){
-		int[]currentTile, destTiles;
-		int nextXTile, nextYTile, distanceToObstacle;
-		double distX, distY;
-		boolean isObstacleInTheWay = false;
-		
-		do{
-			currentTile = fieldScanner.getCurrentTile();
-			destTiles = searchAlgorithm.getNextXYTile(currentTile[0],xDestTile,currentTile[1],yDestTile);
-			nextXTile = destTiles[0];
-			nextYTile = destTiles[1];
-			distX = nextXTile*HALF_TILE_DIM;
-			distY = nextYTile*HALF_TILE_DIM;
-			isObstacleInTheWay = isObstacleInTheWay(distX,distY);
-			
-			if(isObstacleInTheWay){
-				distanceToObstacle = usSensor.getFilteredDistance();
-				fieldScanner.markObstacle(distanceToObstacle);
-				RConsole.println("Succesfully marked obstacle.");
-			}else{
-				travelTo(distX,distY);
-				fieldScanner.setCurrentTile(nextXTile, nextYTile);
-			}
-		}while((xDestTile-nextXTile)!=0||(yDestTile-nextYTile)!=0);
-		
-		robot.setForwardSpeed(0.0);
-	}
-	
+
 	/**
 	 * This method is called once a light source is located and causes the robot to travel towards it.
 	 * While traveling towards the light source, it periodically attempts to correct the heading
@@ -200,7 +178,6 @@ public class Navigation {
 	public void traveToUsingSearchAlgo(double x, double y){
 		double[]nextCoords;
 		double nextXCoord,nextYCoord;
-	
 		do{
 			odo.getPosition(position);
 			nextCoords = searchAlgorithm.getNextXYCoordinate(position[0], x, position[1], y);
@@ -208,28 +185,11 @@ public class Navigation {
 			nextYCoord = nextCoords[1];
 			travelTo(nextXCoord,nextYCoord);
 			odo.getPosition(position);
-			RConsole.println("current x odo. = "+position[0]);
-			RConsole.println("current y odo. = "+position[1]);
-			RConsole.println("next x coordinate = "+nextXCoord);
-			RConsole.println("next y coordinage = "+nextYCoord);
 		}while(Math.abs(position[0]-x)>FIANL_DISTANCE_ERROR || (Math.abs(position[1]-y))>FIANL_DISTANCE_ERROR);
 		
 		robot.setForwardSpeed(0.0);
 	}
 	
-	public double[] convertTilesToDistances(int xTile, int yTile){
-		double[] distances = new double[2];
-		distances[0] = xTile*(TILE_DIM+HALF_TILE_DIM);
-		distances[1] = yTile*(TILE_DIM+HALF_TILE_DIM);
-		return distances;
-	}
-	
-	public int[] convertDistancesToTiles(double xDist, double yDist){
-		int[] tiles = new int[2];
-		tiles[0] = (int)(xDist/(TILE_DIM+HALF_TILE_DIM));
-		tiles[1] = (int)(yDist/(TILE_DIM+HALF_TILE_DIM));
-		return tiles;
-	}
 	
 	/**	
 	 * Travels to the (x,y) coordinate. Updates heading first if necessary.
@@ -240,7 +200,8 @@ public class Navigation {
 		double distX =0;
 		double distY=0;
 		double theta=0;
-		
+		double deltaTheta;
+		Timer timer = new Timer(10,odoCorrection);
 		odo.getPosition(position);
 		distX = x - position[0];
 		distY = y - position[1];
@@ -252,15 +213,91 @@ public class Navigation {
 		if(Math.abs(theta-position[2])>ROTATION_TOLERANCE){
 			turnTo(theta);
 		}
-		
+		timer.start();
 		robot.setForwardSpeed(FORWARD_SPEED);
 		robot.setForwardSpeed(FORWARD_SPEED);
 		//Causes the robot to move forward until it reaches the destination x and y coordinates.
-		while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING || (Math.abs(position[1]-y))>DISTANCE_ERROR_WHILE_TRAVELLING){
-			odo.getPosition(position);
+		/*if(position[2]%180>15){
+			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				odo.getPosition(position);
+			}
+		}else{
+			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				odo.getPosition(position);
+			}*/
+		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
+			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				deltaTheta = odoCorrection.getDeltaTheta();
+				if(Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime<odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. right crossed before left");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]+deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}else if (Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime>odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. left crossed before right");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]-deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				odo.getPosition(position);
+			}
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
+			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				deltaTheta = odoCorrection.getDeltaTheta();
+				if(Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime<odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. right crossed before left");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]+deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}else if (Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime>odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. left crossed before right");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]-deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				odo.getPosition(position);
+			}
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
+			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				deltaTheta = odoCorrection.getDeltaTheta();
+				if(Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime<odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. right crossed before left");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]+deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}else if (Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime>odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. left crossed before right");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]-deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				odo.getPosition(position);
+			}
+		}else{
+			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				deltaTheta = odoCorrection.getDeltaTheta();
+				if(Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime<odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. right crossed before left");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]+deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}else if (Math.toDegrees(deltaTheta)>5 && odoCorrection.rightSensorTime>odoCorrection.leftSensorTime){
+					RConsole.println("Correcting. left crossed before right");
+					robot.setForwardSpeed(0);
+					turnTo(position[2]-deltaTheta);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				odo.getPosition(position);
+
+			}
 		}
 		
+		/*while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING || (Math.abs(position[1]-y))>DISTANCE_ERROR_WHILE_TRAVELLING){
+			odo.getPosition(position);
+		}*/
+		
 		//Stops forward motion.
+		timer.stop();
 		robot.setForwardSpeed(0);
 	}
 	
