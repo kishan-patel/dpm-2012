@@ -314,6 +314,139 @@ public class Navigation {
 		//Stop the rotation
 		robot.setRotationSpeed(0.0);
 	}
+	/**
+	 * This method is going to find an alternative route to pass through an obstacle
+	 */
+	public void avoidObstacle(){
+				
+		stopGoingStraight();
+		
+		int maxSensor = 30;
+		int sensorAverage = 0;
+		double bearing = odo.getTheta();		
+		int count = 10;
+				
+		// Turning to the right and check availability
+		
+		bearing = bearing + 90;		
+		turnTo(bearing);		
+		
+		int i = 0;
+		while( i < count ){
+			
+			sensorAverage = sensorAverage + usSensor.getDistance();
+			
+		}
+		sensorAverage = sensorAverage/count;
+		
+		if( sensorAverage > maxSensor ){
+			// Go straight if there is no obstacle
+			// TODO : Check
+			obstacleTravel(30.48);
+			
+			// Turn to the left 			
+			bearing = bearing - 90;			
+			turnTo(bearing);
+			
+			// TODO : Check
+			obstacleTravel(60.96);
+			
+			// Turn to the left			
+			bearing = bearing - 90;			
+			turnTo(bearing);
+			
+			// TODO : Check
+			obstacleTravel(30.48);
+			
+			// Turn to the right		
+			bearing = bearing + 90;			
+			turnTo(bearing);
+			
+		}
+		else{
+		// Right is occupied
+		// Turning to the left and check availability		
+		
+		bearing = bearing - 180;		
+		turnTo(bearing);	
+			
+		i = 0;
+		sensorAverage = 0;
+		while( i < count ){
+				
+			sensorAverage = sensorAverage + usSensor.getDistance();
+				
+		}
+		sensorAverage = sensorAverage/count;
+		
+		if( sensorAverage > maxSensor ){		
+			// Go straight if there is no obstacle
+			// TODO : Check			
+			obstacleTravel(30.48);
+					
+			// Turn to the right			
+			bearing = bearing + 90;			
+			turnTo(bearing);
+					
+			// TODO : Check
+			obstacleTravel(60.96);
+					
+			// Turn to the right 			
+			bearing = bearing + 90;			
+			turnTo(bearing);
+					
+			// TODO : Check
+			obstacleTravel(30.48);
+					
+			// Turn to the left
+			/*if( bearing - 90 < 0 ){
+				bearing = bearing - 90 + 360;
+			}else{
+				bearing = bearing - 90;
+			}*/
+			bearing = bearing - 90;
+			turnTo(bearing);
+			
+		}else{
+			// Left is occupied
+			// Turning left to face backward		
+			bearing = bearing - 90;		
+			turnTo(bearing);
+			
+		}
+			
+		}
+	}
+	
+	/**
+	 * This method is going to move the robot forward according to the distance(Used primarily for obstacle avoider)
+	 * @param distance
+	 */
+	private void obstacleTravel(double distance){
+		
+		double bearing = odo.getTheta();
+		
+		// Positive y
+		if( bearing < 20 || bearing > 340 ){
+			traveToUsingSearchAlgo(odo.getXPos(), odo.getYPos() + distance);
+			
+		// Positive x
+		}else{if( bearing > 70 && bearing < 110 ){
+			traveToUsingSearchAlgo(odo.getXPos() + distance, odo.getYPos());
+			
+		// Negative y	
+		}else{if( bearing > 160 && bearing < 200 ){
+			traveToUsingSearchAlgo(odo.getXPos(), odo.getYPos() - distance);
+			
+		// Negative x	
+		}else{
+			traveToUsingSearchAlgo(odo.getXPos() - distance, odo.getYPos());	
+		}			
+		}			
+		}
+		
+		
+	}
 	
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
