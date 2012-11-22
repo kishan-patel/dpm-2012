@@ -149,4 +149,9 @@ public class Odometer implements TimerListener {
 		return coords;
 	}
 
+	public void setTheta(double t){
+		synchronized(lock){
+			theta = t;
+		}
+	}
 }

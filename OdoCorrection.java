@@ -14,7 +14,7 @@ public class OdoCorrection implements TimerListener
 	 * @return boolean array representing which light sensors are on lines (0 = left, 1 = right)
 	 */
 	
-	private final int timedOut=500;
+	private final int timedOut=1500;
 	private boolean disabled = false;
 	private Odometer odo; 
 	LightSensor leftLightSensor;
@@ -26,8 +26,8 @@ public class OdoCorrection implements TimerListener
 
 	public OdoCorrection(Odometer odo){
 		this.odo = odo;
-		leftLightSensor = SensorAndMotorInfo.LS_LEFT_SENSOR;
-		rightLightSensor = SensorAndMotorInfo.LS_RIGHT_SENSOR;
+		leftLightSensor = SensorAndMotorInfo.LS_LOCALIZATION_SENSOR;
+		//rightLightSensor = SensorAndMotorInfo.LS_RIGHT_SENSOR;
 	}
 	
 	private  boolean[] isOnLine()
@@ -112,13 +112,12 @@ public class OdoCorrection implements TimerListener
 			double[] position = new double[3];
 			odo.getPosition(position);
 			double distance,averageSpeed,axis;
-			double deltaTheta;
+		
 			
 			//averageSpeed=(SysConst.LEFT_RADIUS*SysConst.leftMotor.getSpeed()+SysConst.RIGHT_RADIUS*SysConst.rightMotor.getSpeed())*(Math.PI/180.0)/2; 
 			averageSpeed=TwoWheeledRobot.DEFAULT_LEFT_RADIUS*TwoWheeledRobot.leftMotor.getSpeed()*(Math.PI/180.0);
 			distance=deltaTime*averageSpeed/1000.0;
 			deltaTheta = Math.atan(distance/TwoWheeledRobot.DEFAULT_WIDTH);
-			RConsole.println("Delta theta is: "+deltaTheta);
 		}
 
 		
