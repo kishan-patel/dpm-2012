@@ -10,7 +10,7 @@ import lejos.nxt.NXTRegulatedMotor;
 
 public class Claw {
 	private final int pulleyMotorRadius = 1;
-	public final static int pulleyHeight = 2;
+	public final static int pulleyHeight = 20;
 	private final int pulleySpeed = 100;
 	private final static double ONE_ROTATION = 8.4;
 	private final int clawSpeed = 50;	
@@ -33,7 +33,7 @@ public class Claw {
 	this.clawMotor = clawMotor;
 	this.pulleyMotor = pulleyMotor;
 	this.pulleyMotor2 = pulleyMotor2;
-	this.open = true;
+	this.open = false;
 	this.currentHeight = pulleyHeight;
 
 	}
@@ -80,11 +80,6 @@ public class Claw {
 			closeClaw();
 			this.open = false;
 
-		}else{
-
-			openClaw();
-			this.open = true;			
-			
 		}
 			
 	}
@@ -99,6 +94,7 @@ public class Claw {
 		clawMotor.setSpeed(clawSpeed);
 		clawMotor.rotate(-noOfRotsClaw);
 		clawMotor.setSpeed(stop);
+		this.open = true;
 	}
 	
 	private void moveClaw(int noOfRotsPulley){
