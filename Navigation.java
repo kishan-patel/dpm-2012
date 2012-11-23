@@ -338,10 +338,11 @@ public class Navigation {
 			
 		}
 		sensorAverage = sensorAverage/count;
-		
+		RConsole.println("No obstacle on the right." + sensorAverage);
 		if( sensorAverage > maxSensor ){
 			// Go straight if there is no obstacle
 			// TODO : Check
+			RConsole.println("No obstacle on the right.");
 			obstacleTravel(30.48);
 			
 			// Turn to the left 			
@@ -366,7 +367,7 @@ public class Navigation {
 		else{
 		// Right is occupied
 		// Turning to the left and check availability		
-		
+			RConsole.println("Obstacle on the right.");
 		bearing = bearing - 180;		
 		turnTo(bearing);	
 			
@@ -381,7 +382,8 @@ public class Navigation {
 		
 		if( sensorAverage > maxSensor ){		
 			// Go straight if there is no obstacle
-			// TODO : Check			
+			// TODO : Check		
+			RConsole.println("No obstacle on the left.");
 			obstacleTravel(30.48);
 					
 			// Turn to the right			
