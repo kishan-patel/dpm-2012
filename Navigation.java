@@ -266,7 +266,7 @@ public class Navigation {
 		odo.getPosition(currPos);
 		angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		
-		if(angleDiff<0){
+		/*if(angleDiff<0){
 			robot.setRotationSpeed(-ROTATION_SPEED);
 			robot.setRotationSpeed(-ROTATION_SPEED);
 		}else{
@@ -276,7 +276,17 @@ public class Navigation {
 		while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
 			odo.getPosition(currPos);
 			angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
-		}
+		}*/
+		// turn 90 degrees clockwise
+			if(angleDiff<0){
+					TwoWheeledRobot.leftMotor.setSpeed(-ROTATION_SPEED);
+					TwoWheeledRobot.rightMotor.setSpeed(-ROTATION_SPEED);
+			}else{
+				TwoWheeledRobot.leftMotor.setSpeed(ROTATION_SPEED);
+				TwoWheeledRobot.rightMotor.setSpeed(ROTATION_SPEED);
+			}
+			TwoWheeledRobot.leftMotor.rotate(convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), true);
+			TwoWheeledRobot.rightMotor.rotate(-convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), false);
 			//Stop the rotation.
 			robot.setRotationSpeed(0.0);
 	}
@@ -449,7 +459,17 @@ public class Navigation {
 		
 		
 	}
-	
+	/**
+	 * 
+	 * @param radius
+	 * @param width
+	 * @param angle
+	 * @return the amount of degrees a motor should turn to make the robot turn a certain angle
+	 */
+	public static int convertAngle(double radius, double width, double angle) {
+		return (int) ((width * angle) / (radius * 2.0));
+	}
+
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}

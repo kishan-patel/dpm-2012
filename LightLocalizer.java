@@ -9,7 +9,7 @@ public class LightLocalizer {
 	private LightSensor ls;
 	private double ROTATION_SPEED = 20;
 	public double CENTER_ROTATION = 9.5;
-	public double BLACK_LINE = 49;
+	public double BLACK_LINE = 44;
 	
 	//private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
 	
