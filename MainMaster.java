@@ -33,19 +33,19 @@ public class MainMaster {
 	public static final int MOVE_CLAW_UP = 3;
 	
 	//Variables used for by the attacker/defender.
-	private static USSensor usSensor;
-	private static TwoWheeledRobot patBot;
-	private static Odometer odo;
+	private static USSensor usSensor = SensorAndMotorInfo.US_SENSOR;;
+	private static TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);
+	private static Odometer odo = new Odometer(patBot, true);
 	private static LCDInfo lcd;
-	private static Navigation nav;
-	private static FieldScanner fieldScanner;
-	private static SearchAlgorithm searchAlgorithm;
-	private static USLocalizer usl;
-	private static LightLocalizer ll;
-	
+	private static Navigation nav = Navigation.getNavigation(odo);
+	private static FieldScanner fieldScanner = FieldScanner.getFieldScanner(odo);
+	private static SearchAlgorithm 	searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();;
+	private static USLocalizer usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
+	private static LightLocalizer ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
+
 	public static void main(String[] args){
 		//connectToBTServer();
-		//connectToSlave();
+		connectToSlave();
 		RConsole.openBluetooth(5000);
 		int buttonChoice;
 		LCD.clear();
@@ -56,15 +56,23 @@ public class MainMaster {
 		}while(buttonChoice!=Button.ID_RIGHT&&buttonChoice!=Button.ID_LEFT);
 
 		if(buttonChoice == Button.ID_LEFT){
+			lcd = new LCDInfo(odo);
 			goToBeacon();
+			goInBestPosition();
 			pickupBeacon();
 			hideBeacon();
+			//goInBestPosition();
+			dropBeacon();
+			nav.traveToUsingSearchAlgo(60, 0);
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
+			lcd = new LCDInfo(odo);
 			findAndGoToBeacon();
 			pickupBeacon();
 		}
-	
+		
+		//LCD.clear();
+		
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		RConsole.close();
@@ -97,24 +105,16 @@ public class MainMaster {
 	}
 	
 	public static void goToBeacon(){
+		nav.traveToUsingSearchAlgo(60,30);
 		
 	}
 	
 	public static void hideBeacon(){
-		
+		nav.traveToUsingSearchAlgo(30, 0);
 	}
 	
 	public static void findAndGoToBeacon(){
 		// Variables used for attacking/defending.
-		usSensor = SensorAndMotorInfo.US_SENSOR;
-		patBot = new TwoWheeledRobot(Motor.A, Motor.B);
-		odo = new Odometer(patBot, true);
-		lcd = new LCDInfo(odo);
-		nav = Navigation.getNavigation(odo);
-		fieldScanner = FieldScanner.getFieldScanner(odo);
-		searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
-		usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
-		ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
 		boolean beaconFound = false;
 		double[] nextSearchLocation;
 		
@@ -142,16 +142,22 @@ public class MainMaster {
 				fieldScanner.turnToBeacon();
 				RConsole.println("Beacon located. turned to it. Headed towards it.");
 				nav.navigateTowardsLightSource(30);
-				fieldScanner.locateBeacon();
-				fieldScanner.turnToBeacon();
-				RConsole.println("Turing 10 degrees CCW");
-				nav.turnTo(odo.getTheta() - 180);
-				RConsole.println("Moving 10 cm forward");
-				nav.goStraight(30);
+				goInBestPosition();
 				beaconFound = true;
 				break;
+				
 			}
 		}
+	}
+	
+	public static void goInBestPosition(){
+		//fieldScanner.locateBeacon();
+		//fieldScanner.turnToBeacon();
+		RConsole.println("Turing 10 degrees CCW");
+		nav.turnTo(odo.getTheta() - 180);
+		RConsole.println("Moving 10 cm forward");
+		nav.goStraight(18);
+		nav.turnTo(odo.getTheta() - 15);
 	}
 	
 	public static void pickupBeacon() {
@@ -179,11 +185,38 @@ public class MainMaster {
 			}
 			dis.readBoolean();
 			Thread.sleep(4000);
-
-			while (true) {
-				Thread.sleep(30);
+		} catch (InterruptedException e) {
+		} catch (IOException e) {
+		} catch (Exception e) {
+		} finally {
+		}
+	}
+	
+	public static void dropBeacon(){
+		try {
+			dos.writeInt(LOWER_CLAW_TO_FLOOR);
+			dos.flush();
+			while (dis.available() <= 0) {
+				Thread.sleep(10);
 			}
+			dis.readBoolean();
+			Thread.sleep(2000);
 
+			dos.writeInt(OPEN_CLAW);
+			dos.flush();
+			while (dis.available() <= 0) {
+				Thread.sleep(10);
+			}
+			dis.readBoolean();
+			Thread.sleep(4000);
+			
+			dos.writeInt(MOVE_CLAW_UP);
+			dos.flush();
+			while (dis.available() <= 0) {
+				Thread.sleep(10);
+			}
+			dis.readBoolean();
+			Thread.sleep(4000);
 		} catch (InterruptedException e) {
 		} catch (IOException e) {
 		} catch (Exception e) {

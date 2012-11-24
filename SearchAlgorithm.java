@@ -67,54 +67,6 @@ public class SearchAlgorithm {
 		return searchLocations[tmp];
 	}
 	
-	public double[] getNextLocCloserToBeacon(double xCurrentCoord,double yCurrentCoord,double theta, int distToBeacon){
-		if(distToBeacon <= 100){
-			//If the beacon is detected by the US sensor, then stop one tile from the beacon*/
-			nextCoords[0]=(distToBeacon-30.48)*Math.cos(theta);
-			nextCoords[1]=(distToBeacon-30.48)*Math.sin(theta);
-		}else{
-			//If the beacon is not detected by the US sensor then we move in the x and y direction
-			//accordingly depending on the current angle.
-			int quadrant = determineQuadrant(theta);
-			
-			if(quadrant == 1){
-				if(Math.abs(Odometer.minimumAngleFromTo(theta, 0))<=15){
-					nextCoords[0] = xCurrentCoord;
-					nextCoords[1] = yCurrentCoord + (2 * 30.48);
-				}else{
-					nextCoords[0] = xCurrentCoord + (2 * 30.48);
-					nextCoords[1] = yCurrentCoord + (2 * 30.48);
-				}
-			} else if (quadrant == 2) {
-				if (Math.abs(Odometer.minimumAngleFromTo(theta, 90)) <= 15) {
-					nextCoords[0] = xCurrentCoord + (2 * 30.48);
-					nextCoords[1] = yCurrentCoord;
-				} else {
-					nextCoords[0] = xCurrentCoord + (2 * 30.48);
-					nextCoords[1] = yCurrentCoord + (2 * 30.48);
-				}
-			} else if (quadrant == 3) {
-				if (Math.abs(Odometer.minimumAngleFromTo(theta, 180)) <= 15) {
-					nextCoords[0] = xCurrentCoord;
-					nextCoords[1] = yCurrentCoord - (2*30.48);
-				} else {
-					nextCoords[0] = xCurrentCoord + (2 * 30.48);
-					nextCoords[1] = yCurrentCoord + (2 * 30.48);
-				}
-			} else {
-				if (Math.abs(Odometer.minimumAngleFromTo(theta, 270)) <= 15) {
-					nextCoords[0] = xCurrentCoord - (2 * 30.48);
-					nextCoords[1] = yCurrentCoord;
-				} else {
-					nextCoords[0] = xCurrentCoord + (2 * 30.48);
-					nextCoords[1] = yCurrentCoord + (2 * 30.48);
-				}
-			}
-		}
-		
-		return nextCoords;
-	}
-	
 	private int getNextXTile(int xCurrentTile, int destXTile){
 		int nextXTile = destXTile;
 		return nextXTile;
@@ -135,15 +87,4 @@ public class SearchAlgorithm {
 		return yNextCoord;
 	}
 	
-	private int determineQuadrant(double theta){
-		if(Math.abs(Odometer.minimumAngleFromTo(theta, 0))<=5&&Math.abs(Odometer.minimumAngleFromTo(theta, 90))<=5){
-			return 1;
-		}else if (Math.abs(Odometer.minimumAngleFromTo(theta, 90))<=5&&Math.abs(Odometer.minimumAngleFromTo(theta, 180))<=5){
-			return 2;
-		}else if (Math.abs(Odometer.minimumAngleFromTo(theta, 90))<=5&&Math.abs(Odometer.minimumAngleFromTo(theta, 180))<=5){
-			return 3;
-		}else{
-			return 4;
-		}
-	}
 }

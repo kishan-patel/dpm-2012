@@ -199,19 +199,22 @@ public class Navigation {
 		
 		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				//TODO Add obstacle avoidance code
 				odo.getPosition(position);
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				//TODO Add obstacle avoidance code
 				odo.getPosition(position);
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				
+				//TODO Add obstacle avoidance code
 				odo.getPosition(position);
 			}
 		}else{
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				//TODO add obstacle avoidance code
 				odo.getPosition(position);
 			}
 		}
@@ -264,8 +267,8 @@ public class Navigation {
 		
 		//Latch the initial angle and get the minimum angle to turn by to reach the destination angle.
 		odo.getPosition(currPos);
-		angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
-		
+		//angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
+		angleDiff = getCorrectionAngle(angle);
 		/*if(angleDiff<0){
 			robot.setRotationSpeed(-ROTATION_SPEED);
 			robot.setRotationSpeed(-ROTATION_SPEED);
@@ -460,6 +463,30 @@ public class Navigation {
 		}
 		
 		
+	}
+	
+	/**
+	 * Determines the angle which the robot needs to rotate by to reach the
+	 * destination.
+	 * 
+	 * @param xFinal
+	 *            Final x destination coordinate.
+	 * @param yFinal
+	 *            Final y destination coordinate.
+	 * @return The correction angle.
+	 */
+	private double getCorrectionAngle(double angleToTurn){
+		double theta = odo.getTheta();
+		
+		if((angleToTurn-odo.getTheta())<-180){
+			angleToTurn = (angleToTurn-theta)+360;
+		}else if((angleToTurn-theta)>180){
+			angleToTurn = (angleToTurn-theta)-360;
+		}else{
+			angleToTurn = (angleToTurn-theta);
+		}
+		
+		return angleToTurn;
 	}
 	/**
 	 * 

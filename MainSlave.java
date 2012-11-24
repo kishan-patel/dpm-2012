@@ -65,7 +65,7 @@ public class MainSlave {
 							dos.writeBoolean(true);
 							dos.flush();
 						}else if(buff == OPEN_CLAW){
-							claw.pickUpBeacon();
+							claw.openClaw();
 							dos.writeBoolean(true);
 							dos.flush();
 						}else if(buff == LOWER_CLAW_TO_FLOOR){
