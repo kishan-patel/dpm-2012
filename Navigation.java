@@ -1,3 +1,4 @@
+import bluetooth.PlayerRole;
 import lejos.nxt.comm.RConsole;
 import lejos.util.Timer;
 
@@ -45,6 +46,7 @@ public class Navigation {
 	
 	private static Navigation navigation = null;
 	
+	private boolean obstacleDetected = false;
 	/**
 	 * Constructor
 	 */
@@ -122,15 +124,23 @@ public class Navigation {
 	}
 	
 	
-	public void traveToUsingSearchAlgo(double x, double y){
+	public void travelToUsingSearchAlgo(double x, double y){
 		double[]nextCoords;
 		double nextXCoord,nextYCoord;
+		
 		do{
 			odo.getPosition(position);
 			nextCoords = searchAlgorithm.getNextXYCoordinate(position[0], x, position[1], y);
 			nextXCoord = nextCoords[0];
 			nextYCoord = nextCoords[1];
 			travelToStraight(nextXCoord, nextYCoord);
+			
+			//If the current position that we are attempting to get at is blocked, we stop trying to
+			//go there.
+			if(obstacleDetected){
+				obstacleDetected = false;
+				break;
+			}
 			odo.getPosition(position);
 		}while(Math.abs(position[0]-x)>FIANL_DISTANCE_ERROR || (Math.abs(position[1]-y))>FIANL_DISTANCE_ERROR);
 		
@@ -141,6 +151,11 @@ public class Navigation {
 		double distX =0;
 		double distY=0;
 		double theta=0;
+		int noOfObjectDetections=0;
+		int distanceToObstacle = usSensor.getDistance();
+		obstacleDetected = false;
+		
+		//Calculates the distance to travel to reach the destination as well as the angle to turn to.
 		odo.getPosition(position);
 		distX = x - position[0];
 		distY = y - position[1];
@@ -155,26 +170,87 @@ public class Navigation {
 		robot.setForwardSpeed(FORWARD_SPEED);
 		robot.setForwardSpeed(FORWARD_SPEED);
 		
+	
+		//Start going forward.
 		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				//TODO Add obstacle avoidance code
 				odo.getPosition(position);
+				distanceToObstacle = usSensor.getDistance();
+				
+				if(distanceToObstacle<=30.48){
+					noOfObjectDetections++;
+				}else{
+					noOfObjectDetections = 0;
+				}
+				
+				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
+					obstacleDetected = true;
+					break;
+				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
-			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				//TODO Add obstacle avoidance code
+			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING && (distanceToObstacle>30.48||noOfObjectDetections<=5)){
 				odo.getPosition(position);
+				distanceToObstacle = usSensor.getDistance();
+				
+				if(distanceToObstacle<=30.48){
+					noOfObjectDetections++;
+				}else{
+					noOfObjectDetections = 0;
+				}
+				
+				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
+					obstacleDetected = true;
+					break;
+				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				//TODO Add obstacle avoidance code
 				odo.getPosition(position);
+				distanceToObstacle = usSensor.getDistance();
+				
+				if(distanceToObstacle<=30.48){
+					noOfObjectDetections++;
+				}else{
+					noOfObjectDetections = 0;
+				}
+				
+				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
+					obstacleDetected = true;
+					break;
+				}
 			}
 		}else{
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				//TODO add obstacle avoidance code
 				odo.getPosition(position);
+				distanceToObstacle = usSensor.getDistance();
+				
+				if(distanceToObstacle<=30.48){
+					noOfObjectDetections++;
+				}else{
+					noOfObjectDetections = 0;
+				}
+				
+				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
+					obstacleDetected = true;
+					break;
+				}
 			}
+		}
+		
+		robot.setForwardSpeed(0);
+		robot.setForwardSpeed(0);
+		
+		if(obstacleDetected){
+			if(Math.abs(position[0]-x)<=30.48 && Math.abs(position[1]-y)<=30.48){
+				if(MainMaster.role == PlayerRole.ATTACKER){
+					searchAlgorithm.markCurrentAttackerLocationBlocked();
+				}else{
+					searchAlgorithm.markCurrentDefenderLocationAsBlocked();
+				}
+			}
+			
+			avoidObstacle();
 		}
 	}
 	
@@ -225,8 +301,8 @@ public class Navigation {
 		
 		//Latch the initial angle and get the minimum angle to turn by to reach the destination angle.
 		odo.getPosition(currPos);
-		//angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
-		angleDiff = getCorrectionAngle(angle);
+		angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
+		//angleDiff = getCorrectionAngle(angle);
 		/*if(angleDiff<0){
 			robot.setRotationSpeed(-ROTATION_SPEED);
 			robot.setRotationSpeed(-ROTATION_SPEED);
@@ -287,6 +363,7 @@ public class Navigation {
 		//Stop the rotation
 		robot.setRotationSpeed(0.0);
 	}
+	
 	/**
 	 * This method is going to find an alternative route to pass through an obstacle
 	 */
@@ -403,49 +480,26 @@ public class Navigation {
 		
 		// Positive y
 		if( bearing < 20 || bearing > 340 ){
-			traveToUsingSearchAlgo(odo.getXPos(), odo.getYPos() + distance);
+			travelToUsingSearchAlgo(odo.getXPos(), odo.getYPos() + distance);
 			
 		// Positive x
 		}else{if( bearing > 70 && bearing < 110 ){
-			traveToUsingSearchAlgo(odo.getXPos() + distance, odo.getYPos());
+			travelToUsingSearchAlgo(odo.getXPos() + distance, odo.getYPos());
 			
 		// Negative y	
 		}else{if( bearing > 160 && bearing < 200 ){
-			traveToUsingSearchAlgo(odo.getXPos(), odo.getYPos() - distance);
+			travelToUsingSearchAlgo(odo.getXPos(), odo.getYPos() - distance);
 			
 		// Negative x	
 		}else{
-			traveToUsingSearchAlgo(odo.getXPos() - distance, odo.getYPos());	
+			travelToUsingSearchAlgo(odo.getXPos() - distance, odo.getYPos());	
 		}			
 		}			
 		}
 		
 		
 	}
-	
-	/**
-	 * Determines the angle which the robot needs to rotate by to reach the
-	 * destination.
-	 * 
-	 * @param xFinal
-	 *            Final x destination coordinate.
-	 * @param yFinal
-	 *            Final y destination coordinate.
-	 * @return The correction angle.
-	 */
-	private double getCorrectionAngle(double angleToTurn){
-		double theta = odo.getTheta();
-		
-		if((angleToTurn-odo.getTheta())<-180){
-			angleToTurn = (angleToTurn-theta)+360;
-		}else if((angleToTurn-theta)>180){
-			angleToTurn = (angleToTurn-theta)-360;
-		}else{
-			angleToTurn = (angleToTurn-theta);
-		}
-		
-		return angleToTurn;
-	}
+
 	/**
 	 * 
 	 * @param radius

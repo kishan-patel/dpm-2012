@@ -1,7 +1,6 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.nxt.LightSensor;
@@ -20,8 +19,9 @@ public class MainMaster {
 	private static BluetoothConnection conn;
 	private static Transmission t;
 	private static StartCorner corner;
-	private static PlayerRole role;
-	private static int dx=10,dy=10;
+	public static PlayerRole role;
+	private static int dx=0,dy=0;
+	private static int ax=0, ay=0;
 	
 	//Variables used for communication with slave.
 	private static NXTConnection connectionToSlave;
@@ -47,8 +47,9 @@ public class MainMaster {
 		//connectToBTServer();
 		connectToSlave();
 		RConsole.openBluetooth(5000);
-		int buttonChoice;
 		LCD.clear();
+		
+		int buttonChoice;
 		do{
 			LCD.drawString("Left - Defend" , 0, 0);
 			LCD.drawString("Right - Attack",0,1);
@@ -57,22 +58,33 @@ public class MainMaster {
 
 		if(buttonChoice == Button.ID_LEFT){
 			lcd = new LCDInfo(odo);
+			
+			//Perform localization prior to going to the beacon.
+			usl.doLocalization();
+			try{Thread.sleep(2000);}catch(InterruptedException e){}
+			ll.doLocalization();
+			searchAlgorithm.setDefenderLocation(dx, dy);
+			
+			//Go to the beacon and stop at the optimal position.
 			goToBeacon();
-			goInBestPosition();
 			pickupBeacon();
 			hideBeacon();
-			//goInBestPosition();
 			dropBeacon();
-			nav.traveToUsingSearchAlgo(60, 0);
+			nav.travelToUsingSearchAlgo(60, 0);
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			lcd = new LCDInfo(odo);
+			
+			//Perform localization prior to going to the beacon.
+			usl.doLocalization();
+			try{Thread.sleep(2000);}catch(InterruptedException e){}
+			ll.doLocalization();
+			
+			//Pickup the beacon and drop it at the optimal location.
 			findAndGoToBeacon();
 			pickupBeacon();
-		}
-		
-		//LCD.clear();
-		
+			nav.travelToUsingSearchAlgo(ax, ay);
+		}		
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		RConsole.close();
@@ -86,11 +98,17 @@ public class MainMaster {
 		if (t == null) {
 			LCD.drawString("Failed to read transmission", 0, 5);
 		} else {
+			//Roles and starting corner.
 			corner = t.startingCorner;
 			role = t.role;
-			// attacker will drop the flag off here
-			dx = t.dx;	//destination pos x
-			dy = t.dy;	//destination pos y
+			
+			//Defender will pick the flag from here.
+			dx = t.fx;
+			dy = t.fy;
+			
+			// attacker will drop the flag off here.
+			ax = t.dx;	
+			ay = t.dy;	
 		}
 	}
 	
@@ -105,22 +123,31 @@ public class MainMaster {
 	}
 	
 	public static void goToBeacon(){
-		nav.traveToUsingSearchAlgo(60,30);
+		boolean beaconFound = false;
+		int maxLight;
+		double[] searchLoc;
 		
+		while(!beaconFound){
+			searchLoc = searchAlgorithm.getNextDefenderSearchLocation();
+			nav.travelToUsingSearchAlgo(searchLoc[0], searchLoc[1]);
+			fieldScanner.locateBeacon();
+			maxLight = fieldScanner.getMaxLightReading();
+			if(maxLight > 50){
+				goInBestPosition();
+				beaconFound = true;
+				break;
+			}
+		}
 	}
 	
 	public static void hideBeacon(){
-		nav.traveToUsingSearchAlgo(30, 0);
+		nav.travelToUsingSearchAlgo(0,0);
 	}
 	
 	public static void findAndGoToBeacon(){
 		// Variables used for attacking/defending.
 		boolean beaconFound = false;
 		double[] nextSearchLocation;
-		
-		usl.doLocalization();
-		try{Thread.sleep(5000);}catch(InterruptedException e){}
-		ll.doLocalization();
 
 		while (!beaconFound) {
 			fieldScanner.locateBeacon();
@@ -130,12 +157,12 @@ public class MainMaster {
 				// position
 				// in our search algorithm.
 				RConsole.println("Beacon not located");
-				nextSearchLocation = searchAlgorithm.getNextSearchLocation();
+				nextSearchLocation = searchAlgorithm.getNextAttackerSearchLocation();
 				if (nextSearchLocation == null) {
 					beaconFound = true;
 					break;
 				} else {
-					nav.traveToUsingSearchAlgo(nextSearchLocation[0],
+					nav.travelToUsingSearchAlgo(nextSearchLocation[0],
 							nextSearchLocation[1]);
 				}
 			} else {
@@ -151,8 +178,8 @@ public class MainMaster {
 	}
 	
 	public static void goInBestPosition(){
-		//fieldScanner.locateBeacon();
-		//fieldScanner.turnToBeacon();
+		fieldScanner.locateBeacon();
+		fieldScanner.turnToBeacon();
 		RConsole.println("Turing 10 degrees CCW");
 		nav.turnTo(odo.getTheta() - 180);
 		RConsole.println("Moving 10 cm forward");

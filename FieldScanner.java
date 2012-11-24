@@ -185,22 +185,7 @@ public class FieldScanner implements TimerListener {
 		nav = navigation;
 	}
 	
-	
-	
-	public int[] getCurrentTile(){
-		return currentTile;
-	}
-	
-	public void setCurrentTile(int xCurrentTile, int yCurrentTile){
-		currentTile[0] = xCurrentTile;
-		currentTile[1] = yCurrentTile;
-	}
-	
-	/**
-	 * Provides access to the field info array.
-	 * @return The field info. for this robot.
-	 */
-	public static int[][] getFieldInfo(){
-		return fieldInfo;
+	public int getMaxLightReading(){
+		return maxLightReading;
 	}
 }
