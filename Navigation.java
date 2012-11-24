@@ -121,48 +121,6 @@ public class Navigation {
 		robot.setForwardSpeed(0.0);
 	}
 	
-	public boolean isObstacleInTheWay(double x, double y){
-		double distX=0;
-		double distY=0;
-		double theta=0;
-		
-		odo.getPosition(position);
-		distX = x - position[0];
-		distY = y - position[1];
-		theta = (Math.toDegrees(Math.atan2(distX,distY)));
-		theta=(theta<=0)?theta+=360:theta;
-		
-		//Update the heading of the robot to point to the direction of the 
-		//final coordinates.
-		if(Math.abs(theta-position[2])>ROTATION_TOLERANCE){
-			turnTo(theta);
-		}
-		
-		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=ROTATION_TOLERANCE){
-			//Obstacle may be in +ve y direction.
-			if(Math.abs(odo.getYPos()-distY)>FIANL_DISTANCE_ERROR){
-				return true;
-			}
-		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=ROTATION_TOLERANCE){
-			//Obstacle may be in +ve x direction.
-			if(Math.abs(odo.getXPos()-distX)>FIANL_DISTANCE_ERROR){
-				return true;
-			}
-		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 270))<=ROTATION_TOLERANCE){
-			//Obstacle may be in -ve y direction.
-			if(Math.abs(odo.getYPos()-distY)>FIANL_DISTANCE_ERROR){
-				return true;
-			}
-		}else{
-			//Obstacle may be in -ve x direction.
-			if(Math.abs(odo.getXPos()-distX)>FIANL_DISTANCE_ERROR){
-				return true;
-			}
-		}
-		
-		return false;
-		
-	}
 	
 	public void traveToUsingSearchAlgo(double x, double y){
 		double[]nextCoords;

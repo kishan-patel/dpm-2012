@@ -7,16 +7,12 @@ import lejos.nxt.comm.RConsole;
 public class LocTests {
 	public static void main(String[] args) {
 		int buttonChoice;
+		RConsole.openBluetooth(5000);
 		//Variables used for by the attacker/defender.
 		USSensor  usSensor = SensorAndMotorInfo.US_SENSOR;;
 		TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);;
 		Odometer odo = new Odometer(patBot,true);;
-		LCDInfo lcd = new LCDInfo(odo);
-		OdoCorrection odoCorrection = new OdoCorrection(odo);;
-		Navigation  nav = Navigation.getNavigation(odo);
-		FieldScanner  fieldScanner = FieldScanner.getFieldScanner(odo);;
-		SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();;
-		USLocalizer usl = usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);;
+		USLocalizer usl =  new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);;
 		LightLocalizer ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
 		
 		do {
@@ -24,6 +20,7 @@ public class LocTests {
 			buttonChoice = Button.waitForAnyPress();
 		} while (buttonChoice != Button.ID_LEFT);
 		
+		LCDInfo lcd = new LCDInfo(odo);
 		usl.doLocalization();
 		ll.doLocalization();
 		

@@ -34,7 +34,7 @@ public class AvoidTest {
 		USLocalizer usl = usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);;
 		LightLocalizer ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
 		final int FWD_SPEED = 10;
-		final int distanceToStopAt = 31;
+		final int distanceToStopAt = 17;
 						
 		int distanceToLightSource = usSensor.getDistance();
 		int noOfObjectDetections=0;

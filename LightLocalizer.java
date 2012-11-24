@@ -9,7 +9,7 @@ public class LightLocalizer {
 	private LightSensor ls;
 	private double ROTATION_SPEED = 20;
 	public double CENTER_ROTATION = 9.5;
-	public double BLACK_LINE = 44;
+	public double BLACK_LINE = 48;
 	
 	//private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
 	
@@ -111,8 +111,8 @@ public class LightLocalizer {
 		// do trig to compute (0,0) and 0 degrees
 		deltaThetaX = thetaX2 - thetaX1;
 		deltaThetaY = thetaY2 - thetaY1;
-		distX = CENTER_ROTATION * Math.cos(Math.toRadians(deltaThetaY/2)); //formula to calculate x coordinate
-		distY = CENTER_ROTATION * Math.cos(Math.toRadians(deltaThetaX/2)); //formula to calculate y coordinate
+		distY = CENTER_ROTATION * Math.cos(Math.toRadians(deltaThetaY/2)); //formula to calculate x coordinate
+		distX = CENTER_ROTATION * Math.cos(Math.toRadians(deltaThetaX/2)); //formula to calculate y coordinate
 		deltaTheta = 180+deltaThetaY/2; //formula to calculate correct heading
 		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
 		//nav.travelTo(0, 0);
