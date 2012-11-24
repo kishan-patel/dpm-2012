@@ -25,10 +25,10 @@ public class TestSquareDrive {
 		
 
 		
-		nav.travelToUsingSearchAlgo(60,0);
-		nav.travelToUsingSearchAlgo(60,60);
-		nav.travelToUsingSearchAlgo(0, 60);
-		nav.travelToUsingSearchAlgo(0, 0);
+		nav.travelToInXandY(60,0);
+		nav.travelToInXandY(60,60);
+		nav.travelToInXandY(0, 60);
+		nav.travelToInXandY(0, 0);
 		//nav.traveToUsingSearchAlgo(0, 200);
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);

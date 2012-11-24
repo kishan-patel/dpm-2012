@@ -124,7 +124,7 @@ public class Navigation {
 	}
 	
 	
-	public void travelToUsingSearchAlgo(double x, double y){
+	public void travelToInXandY(double x, double y){
 		double[]nextCoords;
 		double nextXCoord,nextYCoord;
 		
@@ -189,7 +189,7 @@ public class Navigation {
 				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
-			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING && (distanceToObstacle>30.48||noOfObjectDetections<=5)){
+			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				distanceToObstacle = usSensor.getDistance();
 				
@@ -480,19 +480,19 @@ public class Navigation {
 		
 		// Positive y
 		if( bearing < 20 || bearing > 340 ){
-			travelToUsingSearchAlgo(odo.getXPos(), odo.getYPos() + distance);
+			travelToInXandY(odo.getXPos(), odo.getYPos() + distance);
 			
 		// Positive x
 		}else{if( bearing > 70 && bearing < 110 ){
-			travelToUsingSearchAlgo(odo.getXPos() + distance, odo.getYPos());
+			travelToInXandY(odo.getXPos() + distance, odo.getYPos());
 			
 		// Negative y	
 		}else{if( bearing > 160 && bearing < 200 ){
-			travelToUsingSearchAlgo(odo.getXPos(), odo.getYPos() - distance);
+			travelToInXandY(odo.getXPos(), odo.getYPos() - distance);
 			
 		// Negative x	
 		}else{
-			travelToUsingSearchAlgo(odo.getXPos() - distance, odo.getYPos());	
+			travelToInXandY(odo.getXPos() - distance, odo.getYPos());	
 		}			
 		}			
 		}

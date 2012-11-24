@@ -28,8 +28,8 @@ public class TestNavigation {
 		usl.doLocalization();
 		ll.doLocalization();
 
-		nav.travelToUsingSearchAlgo(120, 120);
-		nav.travelToUsingSearchAlgo(0, 0);
+		nav.travelToInXandY(120, 120);
+		nav.travelToInXandY(0, 0);
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;

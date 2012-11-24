@@ -70,7 +70,7 @@ public class MainMaster {
 			pickupBeacon();
 			hideBeacon();
 			dropBeacon();
-			nav.travelToUsingSearchAlgo(60, 0);
+			nav.travelToInXandY(odo.getXPos()-10, odo.getYPos()-10);
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			lcd = new LCDInfo(odo);
@@ -83,7 +83,9 @@ public class MainMaster {
 			//Pickup the beacon and drop it at the optimal location.
 			findAndGoToBeacon();
 			pickupBeacon();
-			nav.travelToUsingSearchAlgo(ax, ay);
+			nav.travelToInXandY(ax, ay);
+			dropBeacon();
+			nav.travelToInXandY(odo.getXPos()-10, odo.getYPos()-10);
 		}		
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
@@ -129,7 +131,7 @@ public class MainMaster {
 		
 		while(!beaconFound){
 			searchLoc = searchAlgorithm.getNextDefenderSearchLocation();
-			nav.travelToUsingSearchAlgo(searchLoc[0], searchLoc[1]);
+			nav.travelToInXandY(searchLoc[0], searchLoc[1]);
 			fieldScanner.locateBeacon();
 			maxLight = fieldScanner.getMaxLightReading();
 			if(maxLight > 50){
@@ -141,7 +143,7 @@ public class MainMaster {
 	}
 	
 	public static void hideBeacon(){
-		nav.travelToUsingSearchAlgo(0,0);
+		nav.travelToInXandY(0,0);
 	}
 	
 	public static void findAndGoToBeacon(){
@@ -162,7 +164,7 @@ public class MainMaster {
 					beaconFound = true;
 					break;
 				} else {
-					nav.travelToUsingSearchAlgo(nextSearchLocation[0],
+					nav.travelToInXandY(nextSearchLocation[0],
 							nextSearchLocation[1]);
 				}
 			} else {
