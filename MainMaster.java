@@ -56,7 +56,9 @@ public class MainMaster {
 		}while(buttonChoice!=Button.ID_RIGHT&&buttonChoice!=Button.ID_LEFT);
 
 		if(buttonChoice == Button.ID_LEFT){
-			//Defender code
+			goToBeacon();
+			pickupBeacon();
+			hideBeacon();
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			findAndGoToBeacon();
@@ -92,6 +94,14 @@ public class MainMaster {
 		} catch (Exception e) {
 			connectToSlave();
 		}
+	}
+	
+	public static void goToBeacon(){
+		
+	}
+	
+	public static void hideBeacon(){
+		
 	}
 	
 	public static void findAndGoToBeacon(){

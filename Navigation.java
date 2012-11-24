@@ -278,15 +278,17 @@ public class Navigation {
 			angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		}*/
 		// turn 90 degrees clockwise
-			if(angleDiff<0){
+			/*if(angleDiff<0){
 					TwoWheeledRobot.leftMotor.setSpeed(-ROTATION_SPEED);
 					TwoWheeledRobot.rightMotor.setSpeed(-ROTATION_SPEED);
 			}else{
 				TwoWheeledRobot.leftMotor.setSpeed(ROTATION_SPEED);
 				TwoWheeledRobot.rightMotor.setSpeed(ROTATION_SPEED);
-			}
-			TwoWheeledRobot.leftMotor.rotate(convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), true);
-			TwoWheeledRobot.rightMotor.rotate(-convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), false);
+			}*/
+			TwoWheeledRobot.leftMotor.setSpeed(100);
+			TwoWheeledRobot.rightMotor.setSpeed(100);
+			TwoWheeledRobot.rightMotor.rotate(convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), true);
+			TwoWheeledRobot.leftMotor.rotate(-convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), false);
 			//Stop the rotation.
 			robot.setRotationSpeed(0.0);
 	}
@@ -345,7 +347,7 @@ public class Navigation {
 		while( i < count ){
 			
 			sensorAverage = sensorAverage + usSensor.getDistance();
-			
+			i++;
 		}
 		sensorAverage = sensorAverage/count;
 		RConsole.println("No obstacle on the right." + sensorAverage);
@@ -386,7 +388,7 @@ public class Navigation {
 		while( i < count ){
 				
 			sensorAverage = sensorAverage + usSensor.getDistance();
-				
+			i++;	
 		}
 		sensorAverage = sensorAverage/count;
 		
