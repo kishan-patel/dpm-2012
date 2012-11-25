@@ -436,7 +436,42 @@ public class Navigation {
 			turnTo(bearing);
 			
 			// TODO : Check
-			obstacleTravel(60.96);
+			obstacleTravel(30.48);
+			
+			// Check if there is another obstacle in front
+			i = 0;
+			sensorAverage = 0;
+			while( i < count ){
+					
+				sensorAverage = sensorAverage + usSensor.getDistance();
+				i++;	
+			}
+			sensorAverage = sensorAverage/count;
+			
+			// Another obstacle
+			if(sensorAverage < maxSensor){
+				
+				// Turning to the right				
+				bearing = bearing + 90;		
+				turnTo(bearing);
+				
+				// Go straight if there is no obstacle
+				// TODO : Check
+				RConsole.println("No obstacle on the right.");
+				obstacleTravel(30.48);
+				
+				// Turn to the left 			
+				bearing = bearing - 90;			
+				turnTo(bearing);
+				
+				// TODO : Check
+				obstacleTravel(30.48);
+				
+			}else{
+				
+			}
+			// TODO : Check
+			obstacleTravel(30.48);
 			
 			// Turn to the left			
 			bearing = bearing - 90;			
@@ -477,7 +512,42 @@ public class Navigation {
 			turnTo(bearing);
 					
 			// TODO : Check
-			obstacleTravel(60.96);
+			obstacleTravel(30.48);
+						
+			// Check if there is another obstacle in front
+			i = 0;
+			sensorAverage = 0;
+			while( i < count ){
+								
+					sensorAverage = sensorAverage + usSensor.getDistance();
+					i++;	
+			}
+			sensorAverage = sensorAverage/count;
+						
+			// Another obstacle
+			if(sensorAverage < maxSensor){
+							
+				// Turning to the left				
+				bearing = bearing - 90;		
+				turnTo(bearing);
+							
+				// Go straight if there is no obstacle
+				// TODO : Check
+				RConsole.println("No obstacle on the left.");
+				obstacleTravel(30.48);
+			
+				// Turn to the right 			
+				bearing = bearing + 90;			
+				turnTo(bearing);
+							
+				// TODO : Check
+				obstacleTravel(30.48);
+							
+			}else{
+							
+			}
+			// TODO : Check
+			obstacleTravel(30.48);
 					
 			// Turn to the right 			
 			bearing = bearing + 90;			
