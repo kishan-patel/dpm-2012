@@ -14,7 +14,7 @@ public class Navigation {
 	private final double DISTANCE_ERROR_WHILE_TRAVELLING = 1;
 	
 	/**Speed of the motors when the robot is traveling forward.*/
-	private final static int FWD_SPEED = 10;
+	private final static int FWD_SPEED = 8;
 	
 	/**This number specifies how frequently correction should be done while traveling towards the light source.*/
 	private final static int UPDATE_HEADING_PERIOD = 3000;
@@ -47,6 +47,8 @@ public class Navigation {
 	private static Navigation navigation = null;
 	
 	private boolean obstacleDetected = false;
+	private boolean beaconDetected = false;
+	
 	/**
 	 * Constructor
 	 */
@@ -137,7 +139,7 @@ public class Navigation {
 			
 			//If the current position that we are attempting to get at is blocked, we stop trying to
 			//go there.
-			if(obstacleDetected){
+			if(obstacleDetected || beaconDetected){
 				obstacleDetected = false;
 				break;
 			}
@@ -176,64 +178,93 @@ public class Navigation {
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				distanceToObstacle = usSensor.getDistance();
-				
+				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
 					noOfObjectDetections++;
 				}else{
 					noOfObjectDetections = 0;
 				}
 				
-				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
-					obstacleDetected = true;
-					break;
+				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Current y position: "+position[1]);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20))<=10){
+						beaconDetected = true;
+						break;
+					}else{
+						obstacleDetected = true;
+						break;
+					}
 				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				distanceToObstacle = usSensor.getDistance();
-				
+				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
 					noOfObjectDetections++;
 				}else{
 					noOfObjectDetections = 0;
 				}
 				
-				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
-					obstacleDetected = true;
-					break;
+				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20)));
+					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20))<=10){
+						beaconDetected = true;
+						break;
+					}else{
+						obstacleDetected = true;
+						break;
+					}
 				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				distanceToObstacle = usSensor.getDistance();
-				
+				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
 					noOfObjectDetections++;
 				}else{
 					noOfObjectDetections = 0;
 				}
 				
-				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
-					obstacleDetected = true;
-					break;
+				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle)));
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20))<=10){
+						beaconDetected = true;
+						break;
+					}else{
+						obstacleDetected = true;
+						break;
+					}
 				}
 			}
 		}else{
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				distanceToObstacle = usSensor.getDistance();
-				
+				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
 					noOfObjectDetections++;
 				}else{
 					noOfObjectDetections = 0;
 				}
 				
-				if(distanceToObstacle>30.48 && noOfObjectDetections>5){
-					obstacleDetected = true;
-					break;
+				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
+					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20))<=10){
+						beaconDetected = true;
+						break;
+					}else{
+						obstacleDetected = true;
+						break;
+					}
 				}
 			}
 		}
@@ -303,7 +334,7 @@ public class Navigation {
 		odo.getPosition(currPos);
 		angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		//angleDiff = getCorrectionAngle(angle);
-		/*if(angleDiff<0){
+	/*	if(angleDiff<0){
 			robot.setRotationSpeed(-ROTATION_SPEED);
 			robot.setRotationSpeed(-ROTATION_SPEED);
 		}else{
@@ -322,10 +353,15 @@ public class Navigation {
 				TwoWheeledRobot.leftMotor.setSpeed(ROTATION_SPEED);
 				TwoWheeledRobot.rightMotor.setSpeed(ROTATION_SPEED);
 			}*/
-			TwoWheeledRobot.leftMotor.setSpeed(100);
-			TwoWheeledRobot.rightMotor.setSpeed(100);
-			TwoWheeledRobot.rightMotor.rotate(convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), true);
-			TwoWheeledRobot.leftMotor.rotate(-convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), false);
+		
+			while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
+				TwoWheeledRobot.leftMotor.setSpeed(100);
+				TwoWheeledRobot.rightMotor.setSpeed(100);
+				TwoWheeledRobot.rightMotor.rotate(convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), true);
+				TwoWheeledRobot.leftMotor.rotate(-convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), false);
+				angleDiff = Odometer.minimumAngleFromTo(odo.getTheta(), angle);
+			}
+			
 			//Stop the rotation.
 			robot.setRotationSpeed(0.0);
 	}

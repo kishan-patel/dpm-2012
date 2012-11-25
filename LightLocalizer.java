@@ -8,7 +8,7 @@ public class LightLocalizer {
 	private TwoWheeledRobot robot;
 	private LightSensor ls;
 	private double ROTATION_SPEED = 20;
-	public double CENTER_ROTATION = 9.5;
+	public double CENTER_ROTATION = 13;
 	public double BLACK_LINE = 48;
 	
 	//private double thetaX, thetaY, thetaZ, distX, distY, deltaTheta;
@@ -124,7 +124,7 @@ public class LightLocalizer {
 				
 		// when done travel to (0,0) 
 		
-		try{Thread.sleep(15000);}catch(InterruptedException e) {}
+		//try{Thread.sleep(15000);}catch(InterruptedException e) {}
 	}
 
 }

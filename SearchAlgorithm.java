@@ -26,7 +26,7 @@ public class SearchAlgorithm {
 	
 	
 	public double[] getNextAttackerSearchLocation(){
-		if(currentAttackerIndex>=attackerSearchBox.length){
+		if(nextAttackerIndex>=attackerSearchBox.length){
 			//TODO return random tile - returning for now.
 			return null;
 		}
@@ -36,7 +36,7 @@ public class SearchAlgorithm {
 	}	
 	
 	public double[] getNextDefenderSearchLocation(){
-		if(currentDefenderIndex>=defenderSearchBox.length){
+		if(nextDefenderIndex>=defenderSearchBox.length){
 			//TODO return random tile - returning for now
 			return null;
 		}
@@ -46,19 +46,20 @@ public class SearchAlgorithm {
 	}
 	
 	public void setDefenderLocation(int tileX, int tileY){
-		double xCoord = tileX * 30.48;
-		double yCoord = tileY * 30.48;
+		double xCoord = (30.48*tileX)-(30.48/2);
+		double yCoord = (30.48*tileY)-(30.48/2);
 		
 		defenderSearchBox = new double[][]
 				{
-					{yCoord - 30.48, xCoord},
-					{yCoord - 30.48, xCoord+30.48},
-					{yCoord, xCoord + 30.48},
-					{yCoord+30.48, xCoord + 30.48},
+					/*{xCoord, yCoord-(30.48/2)},
+					{xCoord, yCoord+30.48},
+					{xCoord+30.48, yCoord},
+					{yCoord-30.48, xCoord + 30.48},
 					{yCoord+30.48, xCoord},
 					{yCoord+30.48, xCoord - 30.48},
 					{yCoord, xCoord - 30.48},
-					{yCoord - 30.48, xCoord - 30.48},
+					{yCoord - 30.48, xCoord - 30.48},*/
+					{xCoord,yCoord-30.48}
 				};
 	}
 	

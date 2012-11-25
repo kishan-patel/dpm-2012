@@ -20,8 +20,10 @@ public class MainMaster {
 	private static Transmission t;
 	private static StartCorner corner;
 	public static PlayerRole role;
-	private static int dx=0,dy=0;
-	private static int ax=0, ay=0;
+	public static int dx=3,dy=3;
+	public static int ax=1, ay=1;
+	public static double dxCoordinate = (dx*30.48)-(30.48/2);
+	public static double dyCoordinate = (dy*30.48)-(30.48/2);
 	
 	//Variables used for communication with slave.
 	private static NXTConnection connectionToSlave;
@@ -67,10 +69,11 @@ public class MainMaster {
 			
 			//Go to the beacon and stop at the optimal position.
 			goToBeacon();
+			RConsole.println("Done going to beacon");
 			pickupBeacon();
 			hideBeacon();
 			dropBeacon();
-			nav.travelToInXandY(odo.getXPos()-10, odo.getYPos()-10);
+			nav.travelToInXandY(Math.abs(odo.getXPos()-10), Math.abs(odo.getYPos()-10));
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			lcd = new LCDInfo(odo);
@@ -131,10 +134,17 @@ public class MainMaster {
 		
 		while(!beaconFound){
 			searchLoc = searchAlgorithm.getNextDefenderSearchLocation();
+			if(searchLoc == null){
+				beaconFound = true;
+				break;
+			}
 			nav.travelToInXandY(searchLoc[0], searchLoc[1]);
+			RConsole.println("Next y: "+searchLoc[0]);
+			RConsole.println("Next x: "+searchLoc[1]);
 			fieldScanner.locateBeacon();
 			maxLight = fieldScanner.getMaxLightReading();
 			if(maxLight > 50){
+				RConsole.println("Beacon Found");
 				goInBestPosition();
 				beaconFound = true;
 				break;
@@ -205,7 +215,7 @@ public class MainMaster {
 				Thread.sleep(10);
 			}
 			dis.readBoolean();
-			Thread.sleep(4000);
+			Thread.sleep(2000);
 
 			dos.writeInt(MOVE_CLAW_UP);
 			dos.flush();
@@ -213,7 +223,7 @@ public class MainMaster {
 				Thread.sleep(10);
 			}
 			dis.readBoolean();
-			Thread.sleep(4000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 		} catch (IOException e) {
 		} catch (Exception e) {
@@ -237,7 +247,7 @@ public class MainMaster {
 				Thread.sleep(10);
 			}
 			dis.readBoolean();
-			Thread.sleep(4000);
+			Thread.sleep(2000);
 			
 			dos.writeInt(MOVE_CLAW_UP);
 			dos.flush();
@@ -245,7 +255,7 @@ public class MainMaster {
 				Thread.sleep(10);
 			}
 			dis.readBoolean();
-			Thread.sleep(4000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 		} catch (IOException e) {
 		} catch (Exception e) {

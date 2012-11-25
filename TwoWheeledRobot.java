@@ -4,8 +4,10 @@ public class TwoWheeledRobot {
 	/*public static final double DEFAULT_LEFT_RADIUS = 2.65;
 	public static final double DEFAULT_RIGHT_RADIUS = 2.65;
 	public static final double DEFAULT_WIDTH = 19;*/
+	//left bigger than it should be means that the robot shifts in
+	//left smaller than it should be means that the robot shifts out
 	public static final double DEFAULT_LEFT_RADIUS = 2.67;
-	public static final double DEFAULT_RIGHT_RADIUS = 2.73;
+	public static final double DEFAULT_RIGHT_RADIUS = 2.72;
 	public static final double DEFAULT_WIDTH = 19;
 	public static NXTRegulatedMotor leftMotor;
 	public static NXTRegulatedMotor rightMotor;

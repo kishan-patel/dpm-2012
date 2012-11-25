@@ -8,7 +8,7 @@ import lejos.nxt.comm.RConsole;
 public class TestLoc {
 	public static void main(String[] args) {
 		int buttonChoice;
-		RConsole.openBluetooth(5000);
+		//RConsole.openBluetooth(5000);
 		//Variables used for by the attacker/defender.
 		USSensor  usSensor = SensorAndMotorInfo.US_SENSOR;;
 		TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);;
@@ -23,6 +23,7 @@ public class TestLoc {
 		
 		LCDInfo lcd = new LCDInfo(odo);
 		usl.doLocalization();
+		try{Thread.sleep(10000);}catch(InterruptedException e){}
 		ll.doLocalization();
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);

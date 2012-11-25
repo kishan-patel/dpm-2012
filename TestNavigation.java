@@ -16,7 +16,6 @@ public class TestNavigation {
 
 		// Variables used for by the attacker/defender.
 		USSensor usSensor = SensorAndMotorInfo.US_SENSOR;
-		;
 		TwoWheeledRobot patBot = new TwoWheeledRobot(Motor.A, Motor.B);
 		Odometer odo = new Odometer(patBot, true);
 		LCDInfo lcd = new LCDInfo(odo);
@@ -25,10 +24,18 @@ public class TestNavigation {
 				USLocalizer.LocalizationType.FALLING_EDGE);
 		LightLocalizer ll = new LightLocalizer(odo,
 				SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
-		usl.doLocalization();
-		ll.doLocalization();
-
-		nav.travelToInXandY(120, 120);
+		//usl.doLocalization();
+	//	ll.doLocalization();
+		nav.travelToInXandY(60,0);
+		nav.travelToInXandY(60, 60);
+		nav.travelToInXandY(0,60);
+		nav.travelToInXandY(0, 0);
+		
+		
+		
+		nav.travelToInXandY(60,0);
+		nav.travelToInXandY(60, 60);
+		nav.travelToInXandY(0,60);
 		nav.travelToInXandY(0, 0);
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
