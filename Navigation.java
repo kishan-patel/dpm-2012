@@ -48,6 +48,7 @@ public class Navigation {
 	
 	private boolean obstacleDetected = false;
 	private boolean beaconDetected = false;
+	public boolean carryingBeacon = false;
 	
 	/**
 	 * Constructor
@@ -141,6 +142,7 @@ public class Navigation {
 			//go there.
 			if(obstacleDetected || beaconDetected){
 				obstacleDetected = false;
+				beaconDetected = false;
 				break;
 			}
 			odo.getPosition(position);
@@ -190,8 +192,10 @@ public class Navigation {
 					RConsole.println("Current y position: "+position[1]);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
 					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20))<=10){
-						beaconDetected = true;
-						break;
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
 					}else{
 						obstacleDetected = true;
 						break;
@@ -213,8 +217,10 @@ public class Navigation {
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20)));
 					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20))<=10){
-						beaconDetected = true;
-						break;
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
 					}else{
 						obstacleDetected = true;
 						break;
@@ -236,8 +242,10 @@ public class Navigation {
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle)));
 					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20))<=10){
-						beaconDetected = true;
-						break;
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
 					}else{
 						obstacleDetected = true;
 						break;
@@ -259,8 +267,10 @@ public class Navigation {
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
 					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20))<=10){
-						beaconDetected = true;
-						break;
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
 					}else{
 						obstacleDetected = true;
 						break;

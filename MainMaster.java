@@ -71,6 +71,7 @@ public class MainMaster {
 			goToBeacon();
 			RConsole.println("Done going to beacon");
 			pickupBeacon();
+			nav.carryingBeacon = true;
 			hideBeacon();
 			dropBeacon();
 			nav.travelToInXandY(Math.abs(odo.getXPos()-10), Math.abs(odo.getYPos()-10));
