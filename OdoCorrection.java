@@ -42,27 +42,9 @@ public class OdoCorrection implements TimerListener
 	private static boolean[] isOnLine()
 	{
 		boolean a[]= new boolean[2];
-		leftLV = leftLS.getLightValue();
-		rightLV = rightLS.getLightValue();
-		
-		if(leftLV<leftTresh && leftCount>=2){
-			RConsole.println("left detected black line");
-		}else if(leftLV<leftTresh){
-			leftCount++;
-		}else{
-			leftCount = 0;
-		}
-		
-		if(rightLV<rightTresh && rightCount>=2){
-			RConsole.println("right detected black line");
-		}else if(rightLV<rightTresh){
-			rightCount++;
-		}else{
-			rightCount = 0;
-		}
-		
-		a[0]= leftLV< leftTresh&&leftCount>=2;
-		a[1]= rightLV< rightTresh&&rightCount>=2;
+		int l[]=LightFilter.getLights();
+		a[0]= l[0]< Constants.LEFT_LIGHT_THRESHOLD;
+		a[1]= l[1]< Constants.RIGHT_LIGHT_THRESHOLD;
 		return a;
 	}
 	

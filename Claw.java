@@ -84,7 +84,7 @@ public class Claw {
 
 	private void closeClaw(){
 		clawMotor.setSpeed(CLAW_SPEED);
-		clawMotor.rotate(NO_OF_ROTS_CLAW + 50);
+		clawMotor.rotate(NO_OF_ROTS_CLAW );
 		clawMotor.setSpeed(STOP);
 	}
 	

@@ -26,17 +26,35 @@ public class TestNavigation {
 				SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
 		//usl.doLocalization();
 	//	ll.doLocalization();
-		nav.travelToInXandY(60,0);
+		USFilter usFilter = new USFilter();
+		usFilter.start();
+		
+		LightFilter lsFilter = new LightFilter();
+		lsFilter.start();
+		
+		nav.travelToInXandY(15.24,15.24);
+		nav.turn360();
+		nav.travelToInXandY(45.72, 15.24);
+		nav.turn360();
+		nav.travelToInXandY(76.2,15.24);
+		nav.turn360();
+		nav.travelToInXandY(76.2,45.72);
+		nav.turn360();
+		nav.travelToInXandY(45.72,45.72);
+		nav.turn360();
+		nav.travelToInXandY(15.24,45.72);
+		nav.turn360();
+		nav.travelToInXandY(15.24,76.2);
+		nav.turn360();
+		nav.travelToInXandY(76.2,76.2);
+		//nav.travelToInXandY(0, 0);
+		
+		
+		
+	/*	nav.travelToInXandY(60,0);
 		nav.travelToInXandY(60, 60);
 		nav.travelToInXandY(0,60);
-		nav.travelToInXandY(0, 0);
-		
-		
-		
-		nav.travelToInXandY(60,0);
-		nav.travelToInXandY(60, 60);
-		nav.travelToInXandY(0,60);
-		nav.travelToInXandY(0, 0);
+		nav.travelToInXandY(0, 0);*/
 
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;

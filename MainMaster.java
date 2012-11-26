@@ -20,7 +20,7 @@ public class MainMaster {
 	private static Transmission t;
 	private static StartCorner corner;
 	public static PlayerRole role;
-	public static int dx=4,dy=4;
+	public static int dx=3,dy=3;
 	public static int ax=1, ay=1;
 	public static double dxCoordinate = (dx*30.48)-(30.48/2);
 	public static double dyCoordinate = (dy*30.48)-(30.48/2);
@@ -44,11 +44,13 @@ public class MainMaster {
 	private static SearchAlgorithm 	searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();;
 	private static USLocalizer usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);
 	private static LightLocalizer ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
-
+	private static LightFilter lf = new LightFilter();
+	private static USFilter usf = new USFilter();
+	
 	public static void main(String[] args){
 		//connectToBTServer();
 		connectToSlave();
-		RConsole.openBluetooth(5000);
+		RConsole.openBluetooth(10000);
 		LCD.clear();
 		
 		int buttonChoice;
@@ -59,13 +61,19 @@ public class MainMaster {
 		}while(buttonChoice!=Button.ID_RIGHT&&buttonChoice!=Button.ID_LEFT);
 
 		if(buttonChoice == Button.ID_LEFT){
+			//Defender code
 			lcd = new LCDInfo(odo);
+			lf.start();
+			usf.start();
+			searchAlgorithm.setDefenderLocation(dx, dy);
 			
 			//Perform localization prior to going to the beacon.
 			usl.doLocalization();
 			try{Thread.sleep(2000);}catch(InterruptedException e){}
 			ll.doLocalization();
-			searchAlgorithm.setDefenderLocation(dx, dy);
+			
+			//Done for travelling center of tile.
+			nav.travelToInXandY(30.48/2,30.48/2);
 			
 			//Go to the beacon and stop at the optimal position.
 			goToBeacon();
@@ -73,15 +81,22 @@ public class MainMaster {
 			nav.carryingBeacon = true;
 			hideBeacon();
 			dropBeacon();
+			nav.carryingBeacon = false;
 			nav.travelToInXandY(Math.abs(odo.getXPos()-10), Math.abs(odo.getYPos()-10));
+		
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			lcd = new LCDInfo(odo);
+			lf.start();
+			usf.start();
 			
 			//Perform localization prior to going to the beacon.
 			usl.doLocalization();
 			try{Thread.sleep(2000);}catch(InterruptedException e){}
 			ll.doLocalization();
+			
+			//Done for travelling center of tile.
+			nav.travelToInXandY(30.48/2,30.48/2);
 			
 			//Pickup the beacon and drop it at the optimal location.
 			findAndGoToBeacon();
@@ -150,6 +165,7 @@ public class MainMaster {
 	}
 	
 	public static void hideBeacon(){
+		RConsole.println("Found beacon and travelling to 0,0");
 		nav.travelToInXandY(0,0);
 	}
 	
@@ -185,11 +201,11 @@ public class MainMaster {
 	}
 	
 	public static void goInBestPosition(){
-		fieldScanner.locateBeacon();
 		fieldScanner.turnToBeacon();
+		nav.navigateTowardsLightSource(10);
 		nav.turnTo(odo.getTheta() - 180);
-		nav.goStraight(28);
 		nav.turnTo(odo.getTheta() - 15);
+		nav.goStraight(15);
 	}
 	
 	public static void pickupBeacon() {

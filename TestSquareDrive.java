@@ -25,22 +25,36 @@ public class TestSquareDrive {
 		SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();;
 		USLocalizer usl = usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);;
 		LightLocalizer ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
+		
 		//usl.doLocalization();
 		
+		USFilter usFilter = new USFilter();
+		usFilter.start();
+		
+		LightFilter lsFilter = new LightFilter();
+		lsFilter.start();
+		
+		/*try{Thread.sleep(1000);}catch (Exception e) {
+			// TODO: handle exception
+		}*/
+		/*
 		nav.travelToInXandY(0,60);
-		nav.turn360();
+		//nav.turn360();
 		try{Thread.sleep(2000);}catch(InterruptedException e){}
 		
 		nav.travelToInXandY(60,60);
-		nav.turn360();
+		//nav.turn360();
 		try{Thread.sleep(2000);}catch(InterruptedException e){}
 		
 		nav.travelToInXandY(60,0);
-		nav.turn360();
+		//nav.turn360();
 		try{Thread.sleep(2000);}catch(InterruptedException e){}
 		
 		nav.travelToInXandY(0,0);
-
+		*/
+		//nav.turn360();
+		try{Thread.sleep(2000);}catch(InterruptedException e){}
+		
 		/*nav.turn360();
 		
 		try{Thread.sleep(1000);}catch(InterruptedException e){}

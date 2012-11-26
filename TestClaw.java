@@ -19,12 +19,15 @@ public class TestClaw {
 		LCD.drawString("Left = Move up/down", 0, 0);
 		do {
 			buttonChoice = Button.waitForAnyPress();
-			claw.moveToGround();
-			try{Thread.sleep(3000);}catch(InterruptedException e){}
-			claw.moveOffGround();
+		
 		} while (buttonChoice == Button.ID_LEFT);
 		
-		
+		claw.moveToGround();
+		try{Thread.sleep(1000);}catch(InterruptedException e){}
+		claw.pickUpBeacon();
+		try{Thread.sleep(1000);}catch(InterruptedException e){}
+		claw.moveOffGround();
+		try{Thread.sleep(1000);}catch(InterruptedException e){}
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		RConsole.close();

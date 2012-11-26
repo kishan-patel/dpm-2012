@@ -37,9 +37,6 @@ public class Navigation {
 	/**The search algorithm is used to get the tiles to move to to reach the destination*/
 	private SearchAlgorithm searchAlgorithm;
 	
-	/**US sensor used to avoid obstacles*/
-	private USSensor usSensor;
-	
 	
 	/**Holds information about the tiles in the field.*/
 	private FieldScanner fieldScanner;
@@ -47,7 +44,7 @@ public class Navigation {
 	private static Navigation navigation = null;
 	
 	private boolean obstacleDetected = false;
-	private boolean beaconDetected = false;
+	boolean beaconDetected = false;
 	public boolean carryingBeacon = false;
 	LightLocalizer ll;
 	public static Coordinates initPoint = new Coordinates();
@@ -61,7 +58,6 @@ public class Navigation {
 		this.odo = odo;
 		this.robot = odo.getTwoWheeledRobot();
 		this.searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();
-		this.usSensor = SensorAndMotorInfo.US_SENSOR;
 		this.fieldScanner = FieldScanner.getFieldScanner(odo);
 		this.fieldScanner.setNavigation(this);
 		this.ll =   new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
@@ -82,6 +78,15 @@ public class Navigation {
 	 * Robot moves forward at the present heading.
 	 */
 	public void goStraight(int distance){
+		robot.setForwardSpeed(-FWD_SPEED);
+		robot.setForwardSpeed(-FWD_SPEED);
+		robot.distanceToRotate(convertDistance(TwoWheeledRobot.DEFAULT_LEFT_RADIUS, distance));
+	}
+	
+	/**
+	 * Robot moves forward at the present heading.
+	 */
+	public void goStraightForward(double distance){
 		robot.setForwardSpeed(FWD_SPEED);
 		robot.setForwardSpeed(FWD_SPEED);
 		robot.distanceToRotate(convertDistance(TwoWheeledRobot.DEFAULT_LEFT_RADIUS, distance));
@@ -102,19 +107,19 @@ public class Navigation {
 	 */
 	public void navigateTowardsLightSource(int distanceToStopAt) {
 		long start, end;//Used to keep track of when to apply the correction.
-		int distanceToLightSource = usSensor.getDistance();
+		int distanceToLightSource = USFilter.getUS();
 		start = System.currentTimeMillis();
 		int noOfObjectDetections=0;
 		
-		while (distanceToLightSource >= distanceToStopAt||noOfObjectDetections<=5) {
-			robot.setRotationSpeed(0.0);
+		robot.setRotationSpeed(0);
+		robot.setForwardSpeed(FWD_SPEED);
+
+
+		RConsole.println("Distance to light source = "+distanceToLightSource);
+		while (distanceToLightSource >= distanceToStopAt) {
+			RConsole.println("Moving forward");
+			distanceToLightSource = USFilter.getUS();
 			robot.setForwardSpeed(FWD_SPEED);
-			distanceToLightSource = usSensor.getDistance();
-			if(distanceToLightSource<=distanceToStopAt){
-				noOfObjectDetections++;
-			}else{
-				noOfObjectDetections=0;
-			}
 			RConsole.println("Distance to light source: "
 					+ distanceToLightSource);
 			end = System.currentTimeMillis();
@@ -131,6 +136,7 @@ public class Navigation {
 			}
 		}
 		robot.setForwardSpeed(0.0);
+		robot.setForwardSpeed(0.0);
 	}
 	
 	
@@ -141,17 +147,24 @@ public class Navigation {
 		do{
 			odo.getPosition(position);
 			nextCoords = searchAlgorithm.getNextXYCoordinate(position[0], x, position[1], y);
+			
 			nextXCoord = nextCoords[0];
 			nextYCoord = nextCoords[1];
+			if(carryingBeacon){
+				RConsole.println("in travelToInXandY with beacon to pos: "+nextXCoord+","+nextYCoord);
+			}
+			
 			if(!travellingDuringObstacleAvoidance){
 				travelToStraight(nextXCoord, nextYCoord);
 			}else{
 				travelToStraightNoObstacle(nextXCoord, nextYCoord);
 			}
 			
+			travelToStraight(nextXCoord, nextYCoord);
+			
 			//If the current position that we are attempting to get at is blocked, we stop trying to
 			//go there.
-			if(obstacleDetected || beaconDetected){
+			if(obstacleDetected || (beaconDetected&&!carryingBeacon)){
 				obstacleDetected = false;
 				beaconDetected = false;
 				break;
@@ -161,203 +174,6 @@ public class Navigation {
 		
 		robot.setForwardSpeed(0.0);
 	}
-	
-	public void travelToStraight(double x, double y){
-		double distX =0;
-		double distY=0;
-		double theta=0;
-		int noOfObjectDetections=0;
-		int distanceToObstacle = usSensor.getDistance();
-		obstacleDetected = false;
-		
-		//Calculates the distance to travel to reach the destination as well as the angle to turn to.
-		odo.getPosition(position);
-		distX = x - position[0];
-		distY = y - position[1];
-		theta = (Math.toDegrees(Math.atan2(distX,distY)));
-		theta=(theta<=0)?theta+=360:theta;
-		
-		//Update the heading of the robot to point to the direction of the 
-		//final coordinates.
-		if(Math.abs(theta-position[2])>ROTATION_TOLERANCE){
-			turnTo(theta);
-		}
-		robot.setForwardSpeed(FORWARD_SPEED);
-		robot.setForwardSpeed(FORWARD_SPEED);
-		
-		initPoint = Odometer.getCoordinates();
-		Timer timer = new Timer(10, odoCorrection);
-		timer.start();
-		//Start going forward.
-		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
-			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				odo.getPosition(position);
-				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 0))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
-					timer.stop();
-					RConsole.println("Stopped first timer");
-					turnTo(0);
-					timer = new  Timer(10,odoCorrection);
-					timer.start();
-					robot.setForwardSpeed(FORWARD_SPEED);
-					robot.setForwardSpeed(FORWARD_SPEED);
-				}
-				try{Thread.sleep(10);}catch(InterruptedException e){}
-				distanceToObstacle = usSensor.getDistance();
-				RConsole.println("Distance to obs. "+distanceToObstacle);
-				if(distanceToObstacle<=30.48){
-					noOfObjectDetections++;
-				}else{
-					noOfObjectDetections = 0;
-				}
-				
-				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
-					RConsole.println("Distance to obstacle: "+distanceToObstacle);
-					RConsole.println("Current y position: "+position[1]);
-					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
-						if(!carryingBeacon){
-							beaconDetected = true;
-							break;
-						}
-					}else{
-						obstacleDetected = true;
-						break;
-					}
-				}
-			}
-		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
-			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				odo.getPosition(position);
-				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 90))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
-					timer.stop();
-					RConsole.println("Stopped first timer");
-					turnTo(90);
-					timer = new  Timer(10,odoCorrection);
-					timer.start();
-					robot.setForwardSpeed(FORWARD_SPEED);
-					robot.setForwardSpeed(FORWARD_SPEED);
-				}
-				try{Thread.sleep(10);}catch(InterruptedException e){}
-				distanceToObstacle = usSensor.getDistance();
-				RConsole.println("Distance to obs. "+distanceToObstacle);
-				if(distanceToObstacle<=30.48){
-					noOfObjectDetections++;
-				}else{
-					noOfObjectDetections = 0;
-				}
-				
-				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
-					RConsole.println("Distance to obstacle: "+distanceToObstacle);
-					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20)));
-					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
-						if(!carryingBeacon){
-							beaconDetected = true;
-							break;
-						}
-					}else{
-						obstacleDetected = true;
-						break;
-					}
-				}
-			}
-		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
-			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				odo.getPosition(position);
-				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 180))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
-					timer.stop();
-					RConsole.println("Stopped first timer");
-					turnTo(180);
-					timer = new  Timer(10,odoCorrection);
-					timer.start();
-					robot.setForwardSpeed(FORWARD_SPEED);
-					robot.setForwardSpeed(FORWARD_SPEED);
-				}
-				try{Thread.sleep(10);}catch(InterruptedException e){}
-				distanceToObstacle = usSensor.getDistance();
-				RConsole.println("Distance to obs. "+distanceToObstacle);
-				if(distanceToObstacle<=30.48){
-					noOfObjectDetections++;
-				}else{
-					noOfObjectDetections = 0;
-				}
-				
-				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
-					RConsole.println("Distance to obstacle: "+distanceToObstacle);
-					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
-						if(!carryingBeacon){
-							beaconDetected = true;
-							break;
-						}
-					}else{
-						obstacleDetected = true;
-						break;
-					}
-				}
-			}
-		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 270))<=5){
-			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				odo.getPosition(position);
-				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 270))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
-					timer.stop();
-					RConsole.println("Stopped first timer");
-					turnTo(270);
-					timer = new  Timer(10,odoCorrection);
-					timer.start();
-					robot.setForwardSpeed(FORWARD_SPEED);
-					robot.setForwardSpeed(FORWARD_SPEED);
-				}
-				try{Thread.sleep(10);}catch(InterruptedException e){}
-				distanceToObstacle = usSensor.getDistance();
-				RConsole.println("Distance to obs. "+distanceToObstacle);
-				if(distanceToObstacle<=30.48){
-					noOfObjectDetections++;
-				}else{
-					noOfObjectDetections = 0;
-				}
-				
-				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
-					RConsole.println("Distance to obstacle: "+distanceToObstacle);
-					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
-					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
-						if(!carryingBeacon){
-							beaconDetected = true;
-							break;
-						}
-					}else{
-						obstacleDetected = true;
-						break;
-					}
-				}
-			}
-		}
-		
-		timer.stop();
-		RConsole.println("Stopped 2nd timer");
-		robot.setForwardSpeed(0);
-		robot.setForwardSpeed(0);
-
-		if(obstacleDetected){
-			if(Math.abs(position[0]-x)<=30.48 && Math.abs(position[1]-y)<=30.48){
-				if(MainMaster.role == PlayerRole.ATTACKER){
-					searchAlgorithm.markCurrentAttackerLocationBlocked();
-				}else{
-					searchAlgorithm.markCurrentDefenderLocationAsBlocked();
-				}
-			}
-			
-			avoidObstacle();
-		}
-	}
-	
 	
 	public void travelToStraightNoObstacle(double x, double y){
 		double distX =0;
@@ -457,6 +273,183 @@ public class Navigation {
 		robot.setForwardSpeed(0);
 		robot.setForwardSpeed(0);
 
+	}
+	
+	public  void travelToStraight(double x, double y){
+		double distX =0;
+		double distY=0;
+		double theta=0;
+		int noOfObjectDetections=0;
+		int distanceToObstacle = USFilter.getUS();
+		obstacleDetected = false;
+		
+		//Calculates the distance to travel to reach the destination as well as the angle to turn to.
+		odo.getPosition(position);
+		distX = x - position[0];
+		distY = y - position[1];
+		theta = (Math.toDegrees(Math.atan2(distX,distY)));
+		theta=(theta<=0)?theta+=360:theta;
+		
+		//Update the heading of the robot to point to the direction of the 
+		//final coordinates.
+		if(Math.abs(theta-position[2])>ROTATION_TOLERANCE){
+			turnTo(theta);
+		}
+		robot.setForwardSpeed(FORWARD_SPEED);
+		robot.setForwardSpeed(FORWARD_SPEED);
+		
+		initPoint = Odometer.getCoordinates();
+		Timer timer = new Timer(10, odoCorrection);
+		timer.start();
+		//Start going forward.
+		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
+			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 0))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(0);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
+				distanceToObstacle = USFilter.getUS();
+				RConsole.println("Distance to obs. "+distanceToObstacle);
+		
+				
+				if(distanceToObstacle<30.48){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Current y position: "+position[1]);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
+					}else{
+						obstacleDetected = true;
+						break;
+					}
+				}
+			}
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
+			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 90))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(90);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
+				distanceToObstacle = USFilter.getUS();
+				RConsole.println("Distance to obs. "+distanceToObstacle);
+			
+				if(distanceToObstacle<30.48){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20)));
+					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
+					}else{
+						obstacleDetected = true;
+						break;
+					}
+				}
+			}
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
+			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 180))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(180);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
+				distanceToObstacle = USFilter.getUS();
+				RConsole.println("Distance to obs. "+distanceToObstacle);
+				
+				if(distanceToObstacle<30.48){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle)));
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
+					}else{
+						obstacleDetected = true;
+						break;
+					}
+				}
+			}
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 270))<=5){
+			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
+				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 270))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(270);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
+				distanceToObstacle = USFilter.getUS();
+				RConsole.println("Distance to obs. "+distanceToObstacle);
+		
+				if(distanceToObstacle<30.48){
+					RConsole.println("Distance to obstacle: "+distanceToObstacle);
+					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
+					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
+						if(!carryingBeacon){
+							beaconDetected = true;
+							break;
+						}
+					}else{
+						obstacleDetected = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		timer.stop();
+		RConsole.println("Stopped 2nd timer");
+		robot.setForwardSpeed(0);
+		robot.setForwardSpeed(0);
+
+		if(obstacleDetected){
+			if(Math.abs(position[0]-x)<=30.48 && Math.abs(position[1]-y)<=30.48){
+				if(MainMaster.role == PlayerRole.ATTACKER){
+					searchAlgorithm.markCurrentAttackerLocationBlocked();
+				}else{
+					searchAlgorithm.markCurrentDefenderLocationAsBlocked();
+				}
+			}
+			
+			avoidObstacle();
+		}
 	}
 	
 	/**	
@@ -600,13 +593,17 @@ public class Navigation {
 		
 		// Case for wall at the left side
 		if( x < 30 && bearing > 250 && bearing < 290 ){
-			
+			obstacleTravel(15.24);
+			obstacleDetected = false;
 		}else if( x > 275 && bearing > 70 && bearing < 110 ){// Case for wall at the right side
-			
+			obstacleTravel(15.24);
+			obstacleDetected = false;
 		}else if( y < 30 && bearing > 160 && bearing < 200 ){// Case for wall at the bottom side
-			
+			obstacleTravel(15.24);
+			obstacleDetected = false;
 		}else if( y > 275 && (bearing > 340 || bearing < 20) ){// Case for wall at the upper side
-			
+			obstacleTravel(15.24);
+			obstacleDetected = false;
 		}else{// Case for it's really an obstacle
 		
 		if( bearing > 340 || bearing < 20 ){
@@ -618,7 +615,7 @@ public class Navigation {
 		int i = 0;
 		while( i < count ){
 			
-			sensorAverage = sensorAverage + usSensor.getDistance();
+			sensorAverage = sensorAverage + USFilter.getUS();
 			i++;
 		}
 		sensorAverage = sensorAverage/count;
@@ -646,7 +643,7 @@ public class Navigation {
 		sensorAverage = 0;
 		while( i < count ){
 				
-			sensorAverage = sensorAverage + usSensor.getDistance();
+			sensorAverage = sensorAverage + USFilter.getUS();;
 			i++;	
 		}
 		sensorAverage = sensorAverage/count;
@@ -683,7 +680,7 @@ public class Navigation {
 			int i = 0;
 			while( i < count ){
 				
-				sensorAverage = sensorAverage + usSensor.getDistance();
+				sensorAverage = sensorAverage + USFilter.getUS();;
 				i++;
 			}
 			sensorAverage = sensorAverage/count;
@@ -711,7 +708,7 @@ public class Navigation {
 			sensorAverage = 0;
 			while( i < count ){
 					
-				sensorAverage = sensorAverage + usSensor.getDistance();
+				sensorAverage = sensorAverage + USFilter.getUS();
 				i++;	
 			}
 			sensorAverage = sensorAverage/count;
