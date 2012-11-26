@@ -13,5 +13,7 @@ public class SensorAndMotorInfo {
 	public final static NXTRegulatedMotor clawMotor = Motor.B;
 	public final static NXTRegulatedMotor pulleyMotor = Motor.A;
 	public final static NXTRegulatedMotor pulleyMotor2 = Motor.C;
+	public final static LightSensor LEFT_LIGHT_SENSOR = new LightSensor(SensorPort.S1);
+	public final static LightSensor RIGHT_LIGHT_SENSOR = new LightSensor(SensorPort.S2);
 	
 }

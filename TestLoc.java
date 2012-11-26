@@ -22,8 +22,8 @@ public class TestLoc {
 		} while (buttonChoice != Button.ID_LEFT);
 		
 		LCDInfo lcd = new LCDInfo(odo);
-		usl.doLocalization();
-		try{Thread.sleep(10000);}catch(InterruptedException e){}
+		//usl.doLocalization();
+		//try{Thread.sleep(10000);}catch(InterruptedException e){}
 		ll.doLocalization();
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);

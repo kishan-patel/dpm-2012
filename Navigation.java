@@ -6,7 +6,7 @@ import lejos.util.Timer;
 
 public class Navigation {
 	/**The allowed tolerance in the angle while rotating.*/
-	private final static double ROTATION_TOLERANCE = 0.5;
+	private final static double ROTATION_TOLERANCE = 1;
 	
 	/**The allowed tolerance in the distance to a particular point.*/
 	private final double FIANL_DISTANCE_ERROR = 2;
@@ -14,7 +14,7 @@ public class Navigation {
 	private final double DISTANCE_ERROR_WHILE_TRAVELLING = 1;
 	
 	/**Speed of the motors when the robot is traveling forward.*/
-	private final static int FWD_SPEED = 8;
+	private final static int FWD_SPEED = 5;
 	
 	/**This number specifies how frequently correction should be done while traveling towards the light source.*/
 	private final static int UPDATE_HEADING_PERIOD = 3000;
@@ -23,7 +23,7 @@ public class Navigation {
 	private int ROTATION_SPEED = 20;
 	
 	/**The forward speed.*/
-	private static double FORWARD_SPEED = 8;
+	private static double FORWARD_SPEED = 5;
 		
 	/**An array which holds the odometry information for the robot at a given point in time.*/
 	private double[] position = new double[3];
@@ -49,6 +49,9 @@ public class Navigation {
 	private boolean obstacleDetected = false;
 	private boolean beaconDetected = false;
 	public boolean carryingBeacon = false;
+	LightLocalizer ll;
+	public static Coordinates initPoint = new Coordinates();
+	private OdoCorrection odoCorrection;
 	
 	/**
 	 * Constructor
@@ -60,6 +63,9 @@ public class Navigation {
 		this.usSensor = SensorAndMotorInfo.US_SENSOR;
 		this.fieldScanner = FieldScanner.getFieldScanner(odo);
 		this.fieldScanner.setNavigation(this);
+		this.ll =   new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
+		this.odoCorrection = new OdoCorrection(odo);
+		
 	}
 	
 
@@ -174,11 +180,25 @@ public class Navigation {
 		robot.setForwardSpeed(FORWARD_SPEED);
 		robot.setForwardSpeed(FORWARD_SPEED);
 		
-	
+		initPoint = Odometer.getCoordinates();
+		Timer timer = new Timer(10, odoCorrection);
+		timer.start();
 		//Start going forward.
 		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 0))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(0);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
 				distanceToObstacle = usSensor.getDistance();
 				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
@@ -205,6 +225,18 @@ public class Navigation {
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 90))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(90);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
 				distanceToObstacle = usSensor.getDistance();
 				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
@@ -230,6 +262,18 @@ public class Navigation {
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 180))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(180);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
 				distanceToObstacle = usSensor.getDistance();
 				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
@@ -252,9 +296,21 @@ public class Navigation {
 					}
 				}
 			}
-		}else{
+		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 270))<=5){
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 270))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(270);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
 				distanceToObstacle = usSensor.getDistance();
 				RConsole.println("Distance to obs. "+distanceToObstacle);
 				if(distanceToObstacle<=30.48){
@@ -279,9 +335,11 @@ public class Navigation {
 			}
 		}
 		
+		timer.stop();
+		RConsole.println("Stopped 2nd timer");
 		robot.setForwardSpeed(0);
 		robot.setForwardSpeed(0);
-		
+
 		if(obstacleDetected){
 			if(Math.abs(position[0]-x)<=30.48 && Math.abs(position[1]-y)<=30.48){
 				if(MainMaster.role == PlayerRole.ATTACKER){
@@ -392,7 +450,7 @@ public class Navigation {
 		odo.getPosition(currPos);
 		angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
 		//angleDiff = getCorrectionAngle(angle);
-	/*	if(angleDiff<0){
+		/*if(angleDiff<0){
 			robot.setRotationSpeed(-ROTATION_SPEED);
 			robot.setRotationSpeed(-ROTATION_SPEED);
 		}else{
@@ -443,7 +501,7 @@ public class Navigation {
 		destAngle = currPos[2];
 		angleDiff = Odometer.minimumAngleFromTo(currPos[2], destAngle);
 
-		robot.setRotationSpeed(ROTATION_SPEED);
+		/*robot.setRotationSpeed(ROTATION_SPEED);
 		robot.setRotationSpeed(ROTATION_SPEED);
 		//While loop executes until the robot hasn't rotated by 360 degrees.
 		while(Math.abs(angleDiff)>ROTATION_TOLERANCE||!startedRotation){
@@ -452,6 +510,14 @@ public class Navigation {
 			}
 			odo.getPosition(currPos);
 			angleDiff = Odometer.minimumAngleFromTo(currPos[2], destAngle);
+		}*/
+		angleDiff = 5;
+		while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
+			TwoWheeledRobot.leftMotor.setSpeed(100);
+			TwoWheeledRobot.rightMotor.setSpeed(100);
+			TwoWheeledRobot.rightMotor.rotate(convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, 360), true);
+			TwoWheeledRobot.leftMotor.rotate(-convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, 360), false);
+			angleDiff = Odometer.minimumAngleFromTo(odo.getTheta(), destAngle);
 		}
 		
 		//Stop the rotation

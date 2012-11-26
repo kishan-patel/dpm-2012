@@ -1,11 +1,13 @@
 
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
+import lejos.nxt.LightSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.comm.RConsole;
 
 public class TestSquareDrive {
 	public static void main(String[] args) {
+		RConsole.openBluetooth(5000);
 		int buttonChoice;
 		
 		do {
@@ -22,14 +24,43 @@ public class TestSquareDrive {
 		FieldScanner  fieldScanner = FieldScanner.getFieldScanner(odo);;
 		SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();;
 		USLocalizer usl = usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);;
+		LightLocalizer ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
+		//usl.doLocalization();
 		
-
+		nav.travelToInXandY(0,60);
+		nav.turn360();
+		try{Thread.sleep(2000);}catch(InterruptedException e){}
+		
+		nav.travelToInXandY(60,60);
+		nav.turn360();
+		try{Thread.sleep(2000);}catch(InterruptedException e){}
 		
 		nav.travelToInXandY(60,0);
+		nav.turn360();
+		try{Thread.sleep(2000);}catch(InterruptedException e){}
+		
+		nav.travelToInXandY(0,0);
+
+		/*nav.turn360();
+		
+		try{Thread.sleep(1000);}catch(InterruptedException e){}
 		nav.travelToInXandY(60,60);
-		nav.travelToInXandY(0, 60);
-		nav.travelToInXandY(0, 0);
+		nav.turn360();
+		nav.travelToInXandY(60,0);
+		nav.turn360();
+		nav.travelToInXandY(0, 0);*/
+
+		
+		//nav.turn360();
 		//nav.traveToUsingSearchAlgo(0, 200);
+	//	nav.travelToInXandY(60, 0);
+		//nav.turn360();
+		//nav.travelToInXandY(60,60);
+		//nav.turn360();
+		//nav.travelToInXandY(0, 60);
+		//nav.turn360();
+		//nav.travelToInXandY(0, 0);
+		//nav.turn360();
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		RConsole.close();

@@ -130,7 +130,6 @@ public class FieldScanner implements TimerListener {
 	public boolean beaconLocated() {
 		RConsole.println("Max light reading is: "+maxLightReading);
 		if (maxLightReading > MIN_LIGHT_INTENSITY) {
-			RConsole.println("Beacon detected is true.");
 			return true;
 		}
 
@@ -141,7 +140,6 @@ public class FieldScanner implements TimerListener {
 	 * This method is called when the beacon is located. It orients the robot towards the beacon.
 	 */
 	public void turnToBeacon() {
-		RConsole.println("Turning to angle of max-light reading: "+angleOfMaxLightReading);
 		nav.turnTo(angleOfMaxLightReading);
 	}
 

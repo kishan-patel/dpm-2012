@@ -20,7 +20,7 @@ public class MainMaster {
 	private static Transmission t;
 	private static StartCorner corner;
 	public static PlayerRole role;
-	public static int dx=3,dy=3;
+	public static int dx=4,dy=4;
 	public static int ax=1, ay=1;
 	public static double dxCoordinate = (dx*30.48)-(30.48/2);
 	public static double dyCoordinate = (dy*30.48)-(30.48/2);
@@ -69,7 +69,6 @@ public class MainMaster {
 			
 			//Go to the beacon and stop at the optimal position.
 			goToBeacon();
-			RConsole.println("Done going to beacon");
 			pickupBeacon();
 			nav.carryingBeacon = true;
 			hideBeacon();
@@ -140,12 +139,9 @@ public class MainMaster {
 				break;
 			}
 			nav.travelToInXandY(searchLoc[0], searchLoc[1]);
-			RConsole.println("Next y: "+searchLoc[0]);
-			RConsole.println("Next x: "+searchLoc[1]);
 			fieldScanner.locateBeacon();
 			maxLight = fieldScanner.getMaxLightReading();
-			if(maxLight > 50){
-				RConsole.println("Beacon Found");
+			if(maxLight > 33){
 				goInBestPosition();
 				beaconFound = true;
 				break;
@@ -169,7 +165,6 @@ public class MainMaster {
 				// The beacon has not yet been located. Thus, we go to the next
 				// position
 				// in our search algorithm.
-				RConsole.println("Beacon not located");
 				nextSearchLocation = searchAlgorithm.getNextAttackerSearchLocation();
 				if (nextSearchLocation == null) {
 					beaconFound = true;
@@ -180,7 +175,6 @@ public class MainMaster {
 				}
 			} else {
 				fieldScanner.turnToBeacon();
-				RConsole.println("Beacon located. turned to it. Headed towards it.");
 				nav.navigateTowardsLightSource(30);
 				goInBestPosition();
 				beaconFound = true;
@@ -193,10 +187,8 @@ public class MainMaster {
 	public static void goInBestPosition(){
 		fieldScanner.locateBeacon();
 		fieldScanner.turnToBeacon();
-		RConsole.println("Turing 10 degrees CCW");
 		nav.turnTo(odo.getTheta() - 180);
-		RConsole.println("Moving 10 cm forward");
-		nav.goStraight(18);
+		nav.goStraight(28);
 		nav.turnTo(odo.getTheta() - 15);
 	}
 	
