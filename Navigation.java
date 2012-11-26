@@ -52,6 +52,7 @@ public class Navigation {
 	LightLocalizer ll;
 	public static Coordinates initPoint = new Coordinates();
 	private OdoCorrection odoCorrection;
+	private boolean travellingDuringObstacleAvoidance = false;
 	
 	/**
 	 * Constructor
@@ -211,7 +212,7 @@ public class Navigation {
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Current y position: "+position[1]);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20))<=10){
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -248,7 +249,7 @@ public class Navigation {
 				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20)));
-					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20))<=10){
+					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -285,7 +286,7 @@ public class Navigation {
 				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20))<=10){
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -322,7 +323,7 @@ public class Navigation {
 				if(distanceToObstacle<30.48 && noOfObjectDetections>5){
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
-					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20))<=10){
+					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -352,29 +353,7 @@ public class Navigation {
 			avoidObstacle();
 		}
 	}
-	public void travelToInXandYNoObstacle(double x, double y){
-		double[]nextCoords;
-		double nextXCoord,nextYCoord;
-		
-		do{
-			odo.getPosition(position);
-			nextCoords = searchAlgorithm.getNextXYCoordinate(position[0], x, position[1], y);
-			nextXCoord = nextCoords[0];
-			nextYCoord = nextCoords[1];
-			travelToStraightNoObstacle(nextXCoord, nextYCoord);
-			
-			//If the current position that we are attempting to get at is blocked, we stop trying to
-			//go there.
-			if(obstacleDetected || beaconDetected){
-				obstacleDetected = false;
-				beaconDetected = false;
-				break;
-			}
-			odo.getPosition(position);
-		}while(Math.abs(position[0]-x)>FIANL_DISTANCE_ERROR || (Math.abs(position[1]-y))>FIANL_DISTANCE_ERROR);
-		
-		robot.setForwardSpeed(0.0);
-	}
+	
 	
 	public void travelToStraightNoObstacle(double x, double y){
 		double distX =0;
@@ -397,26 +376,80 @@ public class Navigation {
 		robot.setForwardSpeed(FORWARD_SPEED);
 		robot.setForwardSpeed(FORWARD_SPEED);
 		
-	
+		//Timer to do angular correction.
+		Timer timer = new Timer(10, odoCorrection);
+		timer.start();
+		
 		//Start going forward.
 		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
+				
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 0))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(0);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
-				odo.getPosition(position);				
+				odo.getPosition(position);
+				
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 90))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(90);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}				
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 180))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(180);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
 			}
 		}else{
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
+				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 270))>=1){
+					RConsole.println("Applying theta correction");
+					RConsole.println("Angle before correcting is: "+odo.getTheta());
+					timer.stop();
+					RConsole.println("Stopped first timer");
+					turnTo(270);
+					timer = new  Timer(10,odoCorrection);
+					timer.start();
+					robot.setForwardSpeed(FORWARD_SPEED);
+					robot.setForwardSpeed(FORWARD_SPEED);
+				}
+				try{Thread.sleep(10);}catch(InterruptedException e){}
 			}
 		}
 		
+		timer.stop();
 		robot.setForwardSpeed(0);
 		robot.setForwardSpeed(0);
 
@@ -551,7 +584,7 @@ public class Navigation {
 	public void avoidObstacle(){
 				
 		stopGoingStraight();
-		
+		this.travellingDuringObstacleAvoidance = true;
 		int maxSensor = 30;
 		int sensorAverage = 0;
 		double bearing = odo.getTheta();		
@@ -731,6 +764,7 @@ public class Navigation {
 		}
 		
 		}
+		this.travellingDuringObstacleAvoidance = false;
 	}
 	
 	/**
@@ -743,19 +777,19 @@ public class Navigation {
 		
 		// Positive y
 		if( bearing < 20 || bearing > 340 ){
-			travelToInXandYNoObstacle(odo.getXPos(), odo.getYPos() + distance);
+			travelToInXandY(odo.getXPos(), odo.getYPos() + distance);
 			
 		// Positive x
 		}else{if( bearing > 70 && bearing < 110 ){
-			travelToInXandYNoObstacle(odo.getXPos() + distance, odo.getYPos());
+			travelToInXandY(odo.getXPos() + distance, odo.getYPos());
 			
 		// Negative y	
 		}else{if( bearing > 160 && bearing < 200 ){
-			travelToInXandYNoObstacle(odo.getXPos(), odo.getYPos() - distance);
+			travelToInXandY(odo.getXPos(), odo.getYPos() - distance);
 			
 		// Negative x	
 		}else{
-			travelToInXandYNoObstacle(odo.getXPos() - distance, odo.getYPos());	
+			travelToInXandY(odo.getXPos() - distance, odo.getYPos());	
 		}			
 		}			
 		}
