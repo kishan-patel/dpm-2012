@@ -143,7 +143,11 @@ public class Navigation {
 			nextCoords = searchAlgorithm.getNextXYCoordinate(position[0], x, position[1], y);
 			nextXCoord = nextCoords[0];
 			nextYCoord = nextCoords[1];
-			travelToStraight(nextXCoord, nextYCoord);
+			if(!travellingDuringObstacleAvoidance){
+				travelToStraight(nextXCoord, nextYCoord);
+			}else{
+				travelToStraightNoObstacle(nextXCoord, nextYCoord);
+			}
 			
 			//If the current position that we are attempting to get at is blocked, we stop trying to
 			//go there.
@@ -605,6 +609,7 @@ public class Navigation {
 			
 		}else{// Case for it's really an obstacle
 		
+		if( bearing > 340 || bearing < 20 ){
 		// Turning to the right and check availability
 		
 		bearing = bearing + 90;		
@@ -617,68 +622,23 @@ public class Navigation {
 			i++;
 		}
 		sensorAverage = sensorAverage/count;
-		RConsole.println("No obstacle on the right." + sensorAverage);
+		
 		if( sensorAverage > maxSensor ){
 			// Go straight if there is no obstacle			
-			RConsole.println("No obstacle on the right.");
+			
 			obstacleTravel(30.48);
 			
 			// Turn to the left 			
 			bearing = bearing - 90;			
 			turnTo(bearing);			
 			
-			obstacleTravel(30.48);
 			
-			// Check if there is another obstacle in front
-			i = 0;
-			sensorAverage = 0;
-			while( i < count ){
-					
-				sensorAverage = sensorAverage + usSensor.getDistance();
-				i++;	
-			}
-			sensorAverage = sensorAverage/count;
-			
-			// Another obstacle
-			if(sensorAverage < maxSensor){
-				
-				// Turning to the right				
-				bearing = bearing + 90;		
-				turnTo(bearing);
-				
-				// Go straight 
-				
-				RConsole.println("No obstacle on the right.");
-				obstacleTravel(30.48);
-				
-				// Turn to the left 			
-				bearing = bearing - 90;			
-				turnTo(bearing);
-				
-				
-				obstacleTravel(30.48);
-				
-			}else{
-				
-			}
-			
-			obstacleTravel(30.48);
-			
-			// Turn to the left			
-			bearing = bearing - 90;			
-			turnTo(bearing);
-			
-			obstacleTravel(30.48);
-			
-			// Turn to the right		
-			bearing = bearing + 90;			
-			turnTo(bearing);
 			
 		}
 		else{
 		// Right is occupied
 		// Turning to the left and check availability		
-			RConsole.println("Obstacle on the right.");
+		
 		bearing = bearing - 180;		
 		turnTo(bearing);	
 			
@@ -694,64 +654,14 @@ public class Navigation {
 		if( sensorAverage > maxSensor ){		
 			// Go straight if there is no obstacle
 			
-			RConsole.println("No obstacle on the left.");
+			
 			obstacleTravel(30.48);
 					
 			// Turn to the right			
 			bearing = bearing + 90;			
 			turnTo(bearing);
 			
-			obstacleTravel(30.48);
-						
-			// Check if there is another obstacle in front
-			i = 0;
-			sensorAverage = 0;
-			while( i < count ){
-								
-					sensorAverage = sensorAverage + usSensor.getDistance();
-					i++;	
-			}
-			sensorAverage = sensorAverage/count;
-						
-			// Another obstacle
-			if(sensorAverage < maxSensor){
-							
-				// Turning to the left				
-				bearing = bearing - 90;		
-				turnTo(bearing);
-							
-				// Go straight 				
-				RConsole.println("No obstacle on the left.");
-				obstacleTravel(30.48);
 			
-				// Turn to the right 			
-				bearing = bearing + 90;			
-				turnTo(bearing);
-							
-				
-				obstacleTravel(30.48);
-							
-			}else{
-							
-			}
-			
-			obstacleTravel(30.48);
-					
-			// Turn to the right 			
-			bearing = bearing + 90;			
-			turnTo(bearing);
-					
-			
-			obstacleTravel(30.48);
-					
-			// Turn to the left
-			/*if( bearing - 90 < 0 ){
-				bearing = bearing - 90 + 360;
-			}else{
-				bearing = bearing - 90;
-			}*/
-			bearing = bearing - 90;
-			turnTo(bearing);
 			
 		}else{
 			// Left is occupied
@@ -760,6 +670,71 @@ public class Navigation {
 			turnTo(bearing);
 			
 		}
+			
+		}
+		
+		}else{
+			
+
+			// Turning to the left and check availability			
+			bearing = bearing - 90;		
+			turnTo(bearing);		
+			
+			int i = 0;
+			while( i < count ){
+				
+				sensorAverage = sensorAverage + usSensor.getDistance();
+				i++;
+			}
+			sensorAverage = sensorAverage/count;
+			
+			if( sensorAverage > maxSensor ){
+				// Go straight if there is no obstacle			
+				
+				obstacleTravel(30.48);
+				
+				// Turn to the right 			
+				bearing = bearing + 90;			
+				turnTo(bearing);			
+				
+				
+				
+			}
+			else{
+			// Left is occupied
+			// Turning to the right and check availability		
+			
+			bearing = bearing + 180;		
+			turnTo(bearing);	
+				
+			i = 0;
+			sensorAverage = 0;
+			while( i < count ){
+					
+				sensorAverage = sensorAverage + usSensor.getDistance();
+				i++;	
+			}
+			sensorAverage = sensorAverage/count;
+			
+			if( sensorAverage > maxSensor ){		
+				// Go straight if there is no obstacle				
+				obstacleTravel(30.48);
+						
+				// Turn to the left			
+				bearing = bearing - 90;			
+				turnTo(bearing);
+				
+				
+				
+			}else{
+				// Left is occupied
+				// Turning right to face backward		
+				bearing = bearing + 90;		
+				turnTo(bearing);
+				
+			}
+				
+			}
 			
 		}
 		
