@@ -294,13 +294,34 @@ public class Navigation {
 			avoidObstacle();
 		}
 	}
+	public void travelToInXandYNoObstacle(double x, double y){
+		double[]nextCoords;
+		double nextXCoord,nextYCoord;
+		
+		do{
+			odo.getPosition(position);
+			nextCoords = searchAlgorithm.getNextXYCoordinate(position[0], x, position[1], y);
+			nextXCoord = nextCoords[0];
+			nextYCoord = nextCoords[1];
+			travelToStraightNoObstacle(nextXCoord, nextYCoord);
+			
+			//If the current position that we are attempting to get at is blocked, we stop trying to
+			//go there.
+			if(obstacleDetected || beaconDetected){
+				obstacleDetected = false;
+				beaconDetected = false;
+				break;
+			}
+			odo.getPosition(position);
+		}while(Math.abs(position[0]-x)>FIANL_DISTANCE_ERROR || (Math.abs(position[1]-y))>FIANL_DISTANCE_ERROR);
+		
+		robot.setForwardSpeed(0.0);
+	}
 	
 	public void travelToStraightNoObstacle(double x, double y){
 		double distX =0;
 		double distY=0;
-		double theta=0;
-		int noOfObjectDetections=0;
-		int distanceToObstacle = usSensor.getDistance();
+		double theta=0;		
 		obstacleDetected = false;
 		
 		//Calculates the distance to travel to reach the destination as well as the angle to turn to.
@@ -469,7 +490,22 @@ public class Navigation {
 		int sensorAverage = 0;
 		double bearing = odo.getTheta();		
 		int count = 10;
-				
+		double x = odo.getXPos();
+		double y = odo.getYPos();
+		
+		// CHECK FIRST IF IT'S A WALL
+		
+		// Case for wall at the left side
+		if( x < 30 && bearing > 250 && bearing < 290 ){
+			
+		}else if( x > 275 && bearing > 70 && bearing < 110 ){// Case for wall at the right side
+			
+		}else if( y < 30 && bearing > 160 && bearing < 200 ){// Case for wall at the bottom side
+			
+		}else if( y > 275 && (bearing > 340 || bearing < 20) ){// Case for wall at the upper side
+			
+		}else{// Case for it's really an obstacle
+		
 		// Turning to the right and check availability
 		
 		bearing = bearing + 90;		
@@ -484,16 +520,14 @@ public class Navigation {
 		sensorAverage = sensorAverage/count;
 		RConsole.println("No obstacle on the right." + sensorAverage);
 		if( sensorAverage > maxSensor ){
-			// Go straight if there is no obstacle
-			// TODO : Check
+			// Go straight if there is no obstacle			
 			RConsole.println("No obstacle on the right.");
 			obstacleTravel(30.48);
 			
 			// Turn to the left 			
 			bearing = bearing - 90;			
-			turnTo(bearing);
+			turnTo(bearing);			
 			
-			// TODO : Check
 			obstacleTravel(30.48);
 			
 			// Check if there is another obstacle in front
@@ -514,7 +548,7 @@ public class Navigation {
 				turnTo(bearing);
 				
 				// Go straight 
-				// TODO : Check
+				
 				RConsole.println("No obstacle on the right.");
 				obstacleTravel(30.48);
 				
@@ -522,20 +556,19 @@ public class Navigation {
 				bearing = bearing - 90;			
 				turnTo(bearing);
 				
-				// TODO : Check
+				
 				obstacleTravel(30.48);
 				
 			}else{
 				
 			}
-			// TODO : Check
+			
 			obstacleTravel(30.48);
 			
 			// Turn to the left			
 			bearing = bearing - 90;			
 			turnTo(bearing);
 			
-			// TODO : Check
 			obstacleTravel(30.48);
 			
 			// Turn to the right		
@@ -561,15 +594,14 @@ public class Navigation {
 		
 		if( sensorAverage > maxSensor ){		
 			// Go straight if there is no obstacle
-			// TODO : Check		
+			
 			RConsole.println("No obstacle on the left.");
 			obstacleTravel(30.48);
 					
 			// Turn to the right			
 			bearing = bearing + 90;			
 			turnTo(bearing);
-					
-			// TODO : Check
+			
 			obstacleTravel(30.48);
 						
 			// Check if there is another obstacle in front
@@ -589,8 +621,7 @@ public class Navigation {
 				bearing = bearing - 90;		
 				turnTo(bearing);
 							
-				// Go straight 
-				// TODO : Check
+				// Go straight 				
 				RConsole.println("No obstacle on the left.");
 				obstacleTravel(30.48);
 			
@@ -598,20 +629,20 @@ public class Navigation {
 				bearing = bearing + 90;			
 				turnTo(bearing);
 							
-				// TODO : Check
+				
 				obstacleTravel(30.48);
 							
 			}else{
 							
 			}
-			// TODO : Check
+			
 			obstacleTravel(30.48);
 					
 			// Turn to the right 			
 			bearing = bearing + 90;			
 			turnTo(bearing);
 					
-			// TODO : Check
+			
 			obstacleTravel(30.48);
 					
 			// Turn to the left
@@ -632,6 +663,8 @@ public class Navigation {
 		}
 			
 		}
+		
+		}
 	}
 	
 	/**
@@ -644,19 +677,19 @@ public class Navigation {
 		
 		// Positive y
 		if( bearing < 20 || bearing > 340 ){
-			travelToStraightNoObstacle(odo.getXPos(), odo.getYPos() + distance);
+			travelToInXandYNoObstacle(odo.getXPos(), odo.getYPos() + distance);
 			
 		// Positive x
 		}else{if( bearing > 70 && bearing < 110 ){
-			travelToStraightNoObstacle(odo.getXPos() + distance, odo.getYPos());
+			travelToInXandYNoObstacle(odo.getXPos() + distance, odo.getYPos());
 			
 		// Negative y	
 		}else{if( bearing > 160 && bearing < 200 ){
-			travelToStraightNoObstacle(odo.getXPos(), odo.getYPos() - distance);
+			travelToInXandYNoObstacle(odo.getXPos(), odo.getYPos() - distance);
 			
 		// Negative x	
 		}else{
-			travelToStraightNoObstacle(odo.getXPos() - distance, odo.getYPos());	
+			travelToInXandYNoObstacle(odo.getXPos() - distance, odo.getYPos());	
 		}			
 		}			
 		}
