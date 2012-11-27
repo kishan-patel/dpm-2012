@@ -94,9 +94,8 @@ public class TwoWheeledRobot {
 			}
 		else {
 			//leftMotor.backward();
+			//leftSpeed = -leftSpeed;
 			leftMotor.forward();
-			leftSpeed = leftSpeed;
-		
 			
 		}
 		
@@ -106,10 +105,9 @@ public class TwoWheeledRobot {
 			rightSpeed = -rightSpeed;
 			}
 		else {
-			/*rightMotor.backward();*/
+			/*rightMotor.backward();
+			rightSpeed = -rightSpeed;*/
 			rightMotor.forward();
-			rightSpeed = rightSpeed;
-			
 			
 		}
 		

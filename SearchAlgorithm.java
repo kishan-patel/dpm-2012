@@ -4,11 +4,14 @@ import lejos.nxt.comm.RConsole;
 public class SearchAlgorithm {
 	private static SearchAlgorithm searchAlgorithm = null;
 	private final double[][] attackerSearchBox = {{0.0,0.0},{30.0,0.0},{60.0,0.0},{90.0,0.0},{90.0,30.0},{90.0,60.0},{90.0,90},{60.0,90.0},{30.0,90.0},{0,90.0},{0.0,0.0}};
-	private double[][] defenderSearchBox;
+	private double[][] defenderSearchBox = {{15.24,15.24},{45.72,15.24},{76.2,15.24},{76.2,45.72},{76.2,76.2},{45.72,76.2},{15.24,76.2},{15.24,45.72}};
 	private int currentAttackerIndex = 0;
 	private int nextAttackerIndex = 0;
 	private int currentDefenderIndex = 0;
 	private int nextDefenderIndex = 0;
+	public static final int TRAVEL_IN_X = 1;
+	public static final int TRAVEL_IN_Y = 2;
+	public static int nextToTravel = TRAVEL_IN_X;
 	
 	private double[] nextCoords = new double [2];
 
@@ -69,6 +72,7 @@ public class SearchAlgorithm {
 	}
 	
 	public void markCurrentDefenderLocationAsBlocked(){
+		RConsole.println("Marking current x and y"+defenderSearchBox[currentDefenderIndex][0]+","+defenderSearchBox[currentDefenderIndex][1]);
 		currentDefenderIndex = nextDefenderIndex;
 		nextDefenderIndex++;
 	}
@@ -77,10 +81,13 @@ public class SearchAlgorithm {
 		double xNextCoord = xCurrentCoord;
 		double yNextCoord = yCurrentCoord;
 		
-		if(Math.abs(xDestCoord-xCurrentCoord)>2){
+	
+		if(nextToTravel == TRAVEL_IN_X){
 			xNextCoord = getNextXCoord(xCurrentCoord, xDestCoord);
-		}else if(Math.abs(yDestCoord-yCurrentCoord)>2){
+			nextToTravel = TRAVEL_IN_Y;
+		}else{
 			yNextCoord = getNextYCoord(yCurrentCoord, yDestCoord);
+			nextToTravel = TRAVEL_IN_X;
 		}
 		
 		nextCoords[0] = xNextCoord;

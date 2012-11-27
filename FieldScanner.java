@@ -29,12 +29,6 @@ public class FieldScanner implements TimerListener {
 	 * information.
 	 */
 	private Odometer odo;
-
-	/** The US sensor is used to get distance to the light source. */
-	private USSensor us;
-
-	/** The light sensor is used to locate the light source. */
-	private LightSensor ls;
 	
 	/** Used to control the forward motion and rotation of the robot. */
 	private Navigation nav;
@@ -78,9 +72,9 @@ public class FieldScanner implements TimerListener {
 	 * while the rotation is done.
 	 */
 	public void timedOut() {
-		currentLightReading = ls.getLightValue();
+		currentLightReading = LightFilter.getBeaconLight();
 		RConsole.println("Current light reading is: "+currentLightReading);
-		if (currentLightReading > maxLightReading) {
+		if ((currentLightReading > Constants.LV_AT_30 && USFilter.getUS()<=35)||(currentLightReading > Constants.LV_AT_60 && USFilter.getUS()>=35)) {
 			maxLightReading = currentLightReading;
 			odo.getPosition(pos);
 			angleOfMaxLightReading = pos[2];
@@ -94,10 +88,8 @@ public class FieldScanner implements TimerListener {
 	 * Constructor
 	 */
 	private FieldScanner(Odometer odo) {
-		this.us = SensorAndMotorInfo.US_SENSOR;
-		this.ls = SensorAndMotorInfo.BEACON_FINDER_LIGHT_SENSOR;
 		this.odo = odo;
-		ls.setFloodlight(true);
+		SensorAndMotorInfo.BEACON_FINDER_LIGHT_SENSOR.setFloodlight(false);
 	}
 	
 	/**
@@ -152,27 +144,6 @@ public class FieldScanner implements TimerListener {
 		timer.start();
 		nav.turn360();
 		timer.stop();
-	}
-
-	/**
-	 * When this method is called, the robot should have located the beacon and be facing it. If these conditions
-	 * are met, this method returns whether the beacon is detected by the US sensor.
-	 * @return Returns true if the distance reported by the US sensor is less than 100cm. False otherwise.
-	 */
-	public boolean isBeaconDetectedByUS() {
-		if (us.getFilteredDistance() < 100) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	/**
-	 * This method requires the robot to be facing the beacon.
-	 * @return The distance to the beacon as recorded by the US sensor.
-	 */
-	public int getDistanceToBeacon(){
-		return us.getFilteredDistance();
 	}
 	
 	/**

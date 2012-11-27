@@ -11,7 +11,7 @@ public class Navigation {
 	/**The allowed tolerance in the distance to a particular point.*/
 	private final double FIANL_DISTANCE_ERROR = 2;
 	
-	private final double DISTANCE_ERROR_WHILE_TRAVELLING = 1;
+	private final double DISTANCE_ERROR_WHILE_TRAVELLING = 2;
 	
 	/**Speed of the motors when the robot is traveling forward.*/
 	private final static int FWD_SPEED = 5;
@@ -50,6 +50,8 @@ public class Navigation {
 	public static Coordinates initPoint = new Coordinates();
 	private OdoCorrection odoCorrection;
 	private boolean travellingDuringObstacleAvoidance = false;
+	private  double finalXDestination = 0;
+	private  double finalYDestination = 0;
 	
 	/**
 	 * Constructor
@@ -87,8 +89,10 @@ public class Navigation {
 	 * Robot moves forward at the present heading.
 	 */
 	public void goStraightForward(double distance){
-		robot.setForwardSpeed(FWD_SPEED);
-		robot.setForwardSpeed(FWD_SPEED);
+		robot.leftMotor.forward();
+		robot.rightMotor.forward();
+		robot.leftMotor.setSpeed(100);
+		robot.rightMotor.setSpeed(100);
 		robot.distanceToRotate(convertDistance(TwoWheeledRobot.DEFAULT_LEFT_RADIUS, distance));
 	}
 	
@@ -174,6 +178,7 @@ public class Navigation {
 		
 		robot.setForwardSpeed(0.0);
 	}
+	
 	
 	public void travelToStraightNoObstacle(double x, double y){
 		double distX =0;
@@ -303,6 +308,7 @@ public class Navigation {
 		timer.start();
 		//Start going forward.
 		if(Math.abs(Odometer.minimumAngleFromTo(position[2], 0))<=5){
+			//0 degrees
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 0))>=1){
@@ -322,21 +328,26 @@ public class Navigation {
 		
 				
 				if(distanceToObstacle<30.48){
-					RConsole.println("Distance to obstacle: "+distanceToObstacle);
-					RConsole.println("Current y position: "+position[1]);
-					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
-						if(!carryingBeacon){
-							beaconDetected = true;
+					if(position[1]>270){
+						//We are near the wall so we don't stop 30.48 from it.
+					}else{
+						RConsole.println("Distance to obstacle: "+distanceToObstacle);
+						RConsole.println("Current y position: "+position[1]);
+						RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
+						if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10&&Math.abs(MainMaster.dxCoordinate-position[0])<=2){
+							if(!carryingBeacon){
+								beaconDetected = true;
+								break;
+							}
+						}else{
+							obstacleDetected = true;
 							break;
 						}
-					}else{
-						obstacleDetected = true;
-						break;
 					}
 				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 90))<=5){
+			//90 degrees
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 90))>=1){
@@ -355,9 +366,12 @@ public class Navigation {
 				RConsole.println("Distance to obs. "+distanceToObstacle);
 			
 				if(distanceToObstacle<30.48){
+					if(position[0]>270){
+						//We are near the wall so we don't stop 30.48 from it.
+					}else{
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20)));
-					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]))<=2&&Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -366,9 +380,11 @@ public class Navigation {
 						obstacleDetected = true;
 						break;
 					}
+					}
 				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 180))<=5){
+			//180 degrees
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 180))>=1){
@@ -387,9 +403,12 @@ public class Navigation {
 				RConsole.println("Distance to obs. "+distanceToObstacle);
 				
 				if(distanceToObstacle<30.48){
+					if(position[1]<30){
+						//We are near the wall so we don't stop 30.48 from it.
+					}else{
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10){
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10&&Math.abs(MainMaster.dxCoordinate-(position[0]))<=2){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -398,9 +417,11 @@ public class Navigation {
 						obstacleDetected = true;
 						break;
 					}
+					}
 				}
 			}
 		}else if (Math.abs(Odometer.minimumAngleFromTo(position[2], 270))<=5){
+			//270 degrees
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 270))>=1){
@@ -418,17 +439,21 @@ public class Navigation {
 				distanceToObstacle = USFilter.getUS();
 				RConsole.println("Distance to obs. "+distanceToObstacle);
 		
-				if(distanceToObstacle<30.48){
-					RConsole.println("Distance to obstacle: "+distanceToObstacle);
-					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
-					if(Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
-						if(!carryingBeacon){
-							beaconDetected = true;
+				if(distanceToObstacle<30.48&&(position[0]>30)){
+					if(position[0]>30){
+						//We are near the wall so we don't stop 30.48 from it.
+					}else{
+						RConsole.println("Distance to obstacle: "+distanceToObstacle);
+						RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
+						if(Math.abs(MainMaster.dyCoordinate-(position[1]))<=2&&Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
+							if(!carryingBeacon){
+								beaconDetected = true;
+								break;
+							}
+						}else{
+							obstacleDetected = true;
 							break;
 						}
-					}else{
-						obstacleDetected = true;
-						break;
 					}
 				}
 			}
@@ -508,6 +533,7 @@ public class Navigation {
 			robot.setRotationSpeed(ROTATION_SPEED);	
 			robot.setRotationSpeed(ROTATION_SPEED);	
 		}
+		
 		while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
 			odo.getPosition(currPos);
 			angleDiff = Odometer.minimumAngleFromTo(currPos[2], angle);
@@ -522,12 +548,15 @@ public class Navigation {
 			}*/
 		
 			while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
+				RConsole.println("Inside turn to");
 				TwoWheeledRobot.leftMotor.setSpeed(100);
 				TwoWheeledRobot.rightMotor.setSpeed(100);
 				TwoWheeledRobot.rightMotor.rotate(convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), true);
 				TwoWheeledRobot.leftMotor.rotate(-convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), false);
 				angleDiff = Odometer.minimumAngleFromTo(odo.getTheta(), angle);
+
 			}
+			
 			
 			//Stop the rotation.
 			robot.setRotationSpeed(0.0);
@@ -590,20 +619,24 @@ public class Navigation {
 		double y = odo.getYPos();
 		
 		// CHECK FIRST IF IT'S A WALL
-		
+		RConsole.println("Success obstacle in front");
 		// Case for wall at the left side
 		if( x < 30 && bearing > 250 && bearing < 290 ){
 			obstacleTravel(15.24);
 			obstacleDetected = false;
+			RConsole.println("Wall left");
 		}else if( x > 275 && bearing > 70 && bearing < 110 ){// Case for wall at the right side
 			obstacleTravel(15.24);
 			obstacleDetected = false;
+			RConsole.println("Wall right");
 		}else if( y < 30 && bearing > 160 && bearing < 200 ){// Case for wall at the bottom side
 			obstacleTravel(15.24);
 			obstacleDetected = false;
+			RConsole.println("Wall bottom");
 		}else if( y > 275 && (bearing > 340 || bearing < 20) ){// Case for wall at the upper side
 			obstacleTravel(15.24);
 			obstacleDetected = false;
+			RConsole.println("Wall up");
 		}else{// Case for it's really an obstacle
 		
 		if( bearing > 340 || bearing < 20 ){
@@ -619,10 +652,10 @@ public class Navigation {
 			i++;
 		}
 		sensorAverage = sensorAverage/count;
-		
+		RConsole.println("Success to turn right");
 		if( sensorAverage > maxSensor ){
 			// Go straight if there is no obstacle			
-			
+			RConsole.println("No obstacle at right");
 			obstacleTravel(30.48);
 			
 			// Turn to the left 			
@@ -635,7 +668,7 @@ public class Navigation {
 		else{
 		// Right is occupied
 		// Turning to the left and check availability		
-		
+			RConsole.println("Obstacle at right");
 		bearing = bearing - 180;		
 		turnTo(bearing);	
 			
@@ -665,14 +698,14 @@ public class Navigation {
 			// Turning left to face backward		
 			bearing = bearing - 90;		
 			turnTo(bearing);
-			
+			RConsole.println("Turn backward");
 		}
 			
 		}
 		
 		}else{
 			
-
+			RConsole.println("Success to turn left");
 			// Turning to the left and check availability			
 			bearing = bearing - 90;		
 			turnTo(bearing);		
@@ -687,7 +720,7 @@ public class Navigation {
 			
 			if( sensorAverage > maxSensor ){
 				// Go straight if there is no obstacle			
-				
+				RConsole.println("Success to go left");
 				obstacleTravel(30.48);
 				
 				// Turn to the right 			
@@ -700,7 +733,7 @@ public class Navigation {
 			else{
 			// Left is occupied
 			// Turning to the right and check availability		
-			
+				RConsole.println("Obstacle left");
 			bearing = bearing + 180;		
 			turnTo(bearing);	
 				
@@ -728,7 +761,7 @@ public class Navigation {
 				// Turning right to face backward		
 				bearing = bearing + 90;		
 				turnTo(bearing);
-				
+				RConsole.println("Turn backward");
 			}
 				
 			}
@@ -745,7 +778,7 @@ public class Navigation {
 	 */
 	private void obstacleTravel(double distance){
 		
-		double bearing = odo.getTheta();
+double bearing = odo.getTheta();
 		
 		// Positive y
 		if( bearing < 20 || bearing > 340 ){
@@ -765,7 +798,6 @@ public class Navigation {
 		}			
 		}			
 		}
-		
 		
 	}
 

@@ -20,7 +20,7 @@ public class MainMaster {
 	private static Transmission t;
 	private static StartCorner corner;
 	public static PlayerRole role;
-	public static int dx=3,dy=3;
+	public static int dx=2,dy=2;
 	public static int ax=1, ay=1;
 	public static double dxCoordinate = (dx*30.48)-(30.48/2);
 	public static double dyCoordinate = (dy*30.48)-(30.48/2);
@@ -65,16 +65,15 @@ public class MainMaster {
 			lcd = new LCDInfo(odo);
 			lf.start();
 			usf.start();
-			searchAlgorithm.setDefenderLocation(dx, dy);
+			//searchAlgorithm.setDefenderLocation(dx, dy);
 			
 			//Perform localization prior to going to the beacon.
 			usl.doLocalization();
 			try{Thread.sleep(2000);}catch(InterruptedException e){}
 			ll.doLocalization();
-			
-			//Done for travelling center of tile.
-			nav.travelToInXandY(30.48/2,30.48/2);
-			
+			nav.travelTo(0,0);
+			setPositionBasedOnCorner();
+			//nav.travelToInXandY(15.24, 90);
 			//Go to the beacon and stop at the optimal position.
 			goToBeacon();
 			pickupBeacon();
@@ -82,8 +81,6 @@ public class MainMaster {
 			hideBeacon();
 			dropBeacon();
 			nav.carryingBeacon = false;
-			nav.travelToInXandY(Math.abs(odo.getXPos()-10), Math.abs(odo.getYPos()-10));
-		
 		}else if (buttonChoice == Button.ID_RIGHT){
 			//Attacker code
 			lcd = new LCDInfo(odo);
@@ -94,21 +91,31 @@ public class MainMaster {
 			usl.doLocalization();
 			try{Thread.sleep(2000);}catch(InterruptedException e){}
 			ll.doLocalization();
-			
-			//Done for travelling center of tile.
-			nav.travelToInXandY(30.48/2,30.48/2);
+			nav.travelTo(0,0);
+			setPositionBasedOnCorner();
 			
 			//Pickup the beacon and drop it at the optimal location.
 			findAndGoToBeacon();
 			pickupBeacon();
 			nav.travelToInXandY(ax, ay);
 			dropBeacon();
-			nav.travelToInXandY(odo.getXPos()-10, odo.getYPos()-10);
 		}		
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		RConsole.close();
 		System.exit(0);
+	}
+	
+	public static void setPositionBasedOnCorner(){
+		if(corner == StartCorner.BOTTOM_LEFT){
+			odo.setPosition(new double [] {0.0, 0.0, 0.0}, new boolean [] {true, true, true});
+		}else if(corner == StartCorner.BOTTOM_RIGHT){
+			odo.setPosition(new double [] {10.0, 0.0, 0.0}, new boolean [] {true, true, true});
+		}else if (corner == StartCorner.TOP_LEFT){
+			odo.setPosition(new double [] {0.0, 10.0, 0.0}, new boolean [] {true, true, true});
+		}else if(corner == StartCorner.TOP_RIGHT){
+			odo.setPosition(new double [] {0.0, 10.0, 10.10}, new boolean [] {true, true, true});
+		}
 	}
 	
 	public static void connectToBTServer(){
@@ -156,7 +163,7 @@ public class MainMaster {
 			nav.travelToInXandY(searchLoc[0], searchLoc[1]);
 			fieldScanner.locateBeacon();
 			maxLight = fieldScanner.getMaxLightReading();
-			if(maxLight > 33){
+			if(maxLight > Constants.LV_AT_30){
 				goInBestPosition();
 				beaconFound = true;
 				break;
@@ -202,10 +209,10 @@ public class MainMaster {
 	
 	public static void goInBestPosition(){
 		fieldScanner.turnToBeacon();
-		nav.navigateTowardsLightSource(10);
+		nav.navigateTowardsLightSource(15);
 		nav.turnTo(odo.getTheta() - 180);
-		nav.turnTo(odo.getTheta() - 15);
-		nav.goStraight(15);
+		nav.turnTo(odo.getTheta() - 9);
+		nav.goStraight(18);
 	}
 	
 	public static void pickupBeacon() {

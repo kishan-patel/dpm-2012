@@ -28,26 +28,20 @@ public class TestAvoid {
 		Odometer odo = new Odometer(patBot,true);;
 		LCDInfo lcd = new LCDInfo(odo);
 		Navigation  nav = Navigation.getNavigation(odo);
-		final int FWD_SPEED = 10;
-		final int distanceToStopAt = 17;
-						
-		int distanceToLightSource = usSensor.getDistance();
-		int noOfObjectDetections=0;
+		FieldScanner  fieldScanner = FieldScanner.getFieldScanner(odo);;
+		SearchAlgorithm searchAlgorithm = SearchAlgorithm.getSearchAlgorithm();;
+		USLocalizer usl = usl = new USLocalizer(odo, usSensor, USLocalizer.LocalizationType.FALLING_EDGE);;
+		LightLocalizer ll = new LightLocalizer(odo, SensorAndMotorInfo.LS_LOCALIZATION_SENSOR);
+		LCD.clear();
 		
-		while(distanceToLightSource >= distanceToStopAt||noOfObjectDetections<=5){
-			
-			distanceToLightSource = usSensor.getDistance();
-			
-			patBot.setRotationSpeed(0.0);
-			patBot.setForwardSpeed(FWD_SPEED);
-			
-			if( distanceToLightSource <= distanceToStopAt ){
-				noOfObjectDetections++;
-			}else{
-				noOfObjectDetections=0;
-			}
-			
-		}
-		nav.avoidObstacle();
+		LightFilter lf = new LightFilter();
+		lf.start();
+		
+		USFilter usf = new USFilter();
+		usf.start();
+		
+		 double dxCoordinate = 15.24;
+		 double dyCoordinate = 213.6;
+		 nav.travelToInXandY(dxCoordinate, dyCoordinate);
 	}
 }

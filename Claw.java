@@ -14,7 +14,7 @@ public class Claw {
 	private final int PULLEY_SPEED = 100;
 	private final static double ONE_ROTATION = 8.4;
 	private final int CLAW_SPEED = 50;	
-	private final int NO_OF_ROTS_CLAW = 200;	
+	private final int NO_OF_ROTS_CLAW = 50;	
 	static final int STOP = 0;
 
 	private NXTRegulatedMotor clawMotor;
@@ -84,7 +84,7 @@ public class Claw {
 
 	private void closeClaw(){
 		clawMotor.setSpeed(CLAW_SPEED);
-		clawMotor.rotate(NO_OF_ROTS_CLAW );
+		clawMotor.rotate(NO_OF_ROTS_CLAW+35);
 		clawMotor.setSpeed(STOP);
 	}
 	
