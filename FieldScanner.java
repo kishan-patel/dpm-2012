@@ -39,9 +39,13 @@ public class FieldScanner implements TimerListener {
 	 */
 	private int maxLightReading = 0;
 
+	private int distanceToMaxLightReading = 0;
+	
 	/** Instantaneous light reading. */
 	private int currentLightReading = 0;
 
+	private int currentDistanceToReading = 0;
+	
 	/** The heading at which the maximum light reading occurred. */
 	private double angleOfMaxLightReading = 0;
 
@@ -73,9 +77,12 @@ public class FieldScanner implements TimerListener {
 	 */
 	public void timedOut() {
 		currentLightReading = LightFilter.getBeaconLight();
+		currentDistanceToReading = USFilter.getUS();
 		RConsole.println("Current light reading is: "+currentLightReading);
-		if ((currentLightReading > Constants.LV_AT_30 && USFilter.getUS()<=35)||(currentLightReading > Constants.LV_AT_60 && USFilter.getUS()>=35)) {
+		RConsole.println("Current distance reading is: "+currentDistanceToReading);
+		if ((currentLightReading > Constants.LV_AT_30 && currentDistanceToReading<=35)||(currentLightReading > Constants.LV_AT_60 && currentDistanceToReading>=35)) {
 			maxLightReading = currentLightReading;
+			distanceToMaxLightReading = currentDistanceToReading;
 			odo.getPosition(pos);
 			angleOfMaxLightReading = pos[2];
 			RConsole.println("(max. light reading,angle)=(" + maxLightReading
@@ -111,6 +118,7 @@ public class FieldScanner implements TimerListener {
 	 */
 	public void reset() {
 		maxLightReading = 0;
+		distanceToMaxLightReading = 0;
 		beaconWithinRangeOfUS = false;
 	}
 
@@ -121,7 +129,7 @@ public class FieldScanner implements TimerListener {
 	 */
 	public boolean beaconLocated() {
 		RConsole.println("Max light reading is: "+maxLightReading);
-		if (maxLightReading > MIN_LIGHT_INTENSITY) {
+		if ((maxLightReading > Constants.LV_AT_30 && currentDistanceToReading<=40)||(maxLightReading > Constants.LV_AT_60 && currentDistanceToReading<=60)) {
 			return true;
 		}
 

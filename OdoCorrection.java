@@ -124,7 +124,7 @@ public class OdoCorrection implements TimerListener
 		
 		if (!disabled && (Math.abs(current.x / 30.48) < 5 || Math.abs(current.y / 30.48) < 5)) 
 		{
-			if (current.theta > 50 && current.theta < 130) {
+			if (Math.abs(Odometer.minimumAngleFromTo(current.theta, 90))<=5) {
 				current.x = Navigation.initPoint.x - (30.48 - Navigation.initPoint.y % 30.48) * Math.tan(deltaTheta);
 				current.theta = 90 + deltaTheta * (180.0 / Math.PI);
 				axis = 30.48 * Math.round(current.y / 30.48);
@@ -132,7 +132,7 @@ public class OdoCorrection implements TimerListener
 						+ ((TwoWheeledRobot.width / 2.0) * Math.sin(Math
 								.abs(deltaTheta)));
 				//correct the X position assuming a constant "deltatTheta" over the whole score, correcting for the whole distance (kinda in advance of 15.24cm)
-			} else if (current.theta > 230 && current.theta < 310) {
+			} else if (Math.abs(Odometer.minimumAngleFromTo(current.theta, 270))<=5) {
 				current.x = Navigation.initPoint.x + (Navigation.initPoint.y % 30.48) * Math.tan(deltaTheta);
 				current.theta = 270 + deltaTheta * (180.0 / Math.PI);
 				axis = 30.48 * Math.round(current.y / 30.48);
@@ -140,7 +140,7 @@ public class OdoCorrection implements TimerListener
 						- ((TwoWheeledRobot.width / 2.0) * Math.sin(Math
 								.abs(deltaTheta)));
 
-			} else if (current.theta > 140 && current.theta < 220) {
+			} else if (Math.abs(Odometer.minimumAngleFromTo(current.theta, 180))<=5) {
 				current.y = Navigation.initPoint.y - (Navigation.initPoint.x % 30.48) * Math.tan(deltaTheta);
 				current.theta = 180 + deltaTheta * (180.0 / Math.PI);
 				axis = 30.48 * Math.round(current.x / 30.48);
@@ -148,7 +148,7 @@ public class OdoCorrection implements TimerListener
 						- ((TwoWheeledRobot.width / 2.0) * Math.sin(Math
 								.abs(deltaTheta)));
 
-			} else if (current.theta > 320 || current.theta < 40) {
+			} else if (Math.abs(Odometer.minimumAngleFromTo(current.theta, 0))<=5) {
 				current.y = Navigation.initPoint.y + (30.48 - Navigation.initPoint.x % 30.48) * Math.tan(deltaTheta);
 				current.theta = 0 + deltaTheta * (180.0 / Math.PI);
 				axis = 30.48 * Math.round(current.x / 30.48);

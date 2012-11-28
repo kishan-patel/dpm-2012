@@ -92,7 +92,7 @@ public class LightLocalizer {
 		distY = CENTER_ROTATION * Math.cos(Math.toRadians(deltaThetaY/2)); //formula to calculate x coordinate
 		distX = -CENTER_ROTATION * Math.cos(Math.toRadians(deltaThetaX/2)); //formula to calculate y coordinate
 		deltaTheta = 205+deltaThetaY/2; //formula to calculate correct heading
-		odo.setPosition(new double [] {distX, distY, deltaTheta}, new boolean [] {true, true, true});
+		odo.setPosition(new double [] {distX-3, distY, deltaTheta}, new boolean [] {true, true, true});
 		//nav.travelTo(0, 0);
 		//odo.setPosition(new double [] {0.0, 0.0, 0.0 }, new boolean [] {true, true, true});
 		nav.turnTo(0);

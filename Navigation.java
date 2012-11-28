@@ -45,6 +45,7 @@ public class Navigation {
 	
 	private boolean obstacleDetected = false;
 	boolean beaconDetected = false;
+	boolean searchLocationBlocked = false;
 	public boolean carryingBeacon = false;
 	LightLocalizer ll;
 	public static Coordinates initPoint = new Coordinates();
@@ -168,7 +169,7 @@ public class Navigation {
 			
 			//If the current position that we are attempting to get at is blocked, we stop trying to
 			//go there.
-			if(obstacleDetected || (beaconDetected&&!carryingBeacon)){
+			if(obstacleDetected || (beaconDetected&&!carryingBeacon)|| searchLocationBlocked){
 				obstacleDetected = false;
 				beaconDetected = false;
 				break;
@@ -184,7 +185,6 @@ public class Navigation {
 		double distX =0;
 		double distY=0;
 		double theta=0;		
-		obstacleDetected = false;
 		
 		//Calculates the distance to travel to reach the destination as well as the angle to turn to.
 		odo.getPosition(position);
@@ -211,10 +211,7 @@ public class Navigation {
 				odo.getPosition(position);
 				
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 0))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(0);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -228,10 +225,7 @@ public class Navigation {
 				odo.getPosition(position);
 				
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 90))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(90);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -244,10 +238,7 @@ public class Navigation {
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 180))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(180);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -260,10 +251,7 @@ public class Navigation {
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 270))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(270);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -287,7 +275,7 @@ public class Navigation {
 		int noOfObjectDetections=0;
 		int distanceToObstacle = USFilter.getUS();
 		obstacleDetected = false;
-		
+		searchLocationBlocked = false;
 		//Calculates the distance to travel to reach the destination as well as the angle to turn to.
 		odo.getPosition(position);
 		distX = x - position[0];
@@ -312,10 +300,7 @@ public class Navigation {
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 0))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(0);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -324,17 +309,19 @@ public class Navigation {
 				}
 				try{Thread.sleep(10);}catch(InterruptedException e){}
 				distanceToObstacle = USFilter.getUS();
-				RConsole.println("Distance to obs. "+distanceToObstacle);
 		
 				
 				if(distanceToObstacle<30.48){
 					if(position[1]>270){
 						//We are near the wall so we don't stop 30.48 from it.
+					}else if(Math.abs(y-(position[1]+distanceToObstacle+22))<=30.48&&Math.abs(x-position[0])<=2){
+						searchLocationBlocked = true;
+						break;
 					}else{
 						RConsole.println("Distance to obstacle: "+distanceToObstacle);
 						RConsole.println("Current y position: "+position[1]);
 						RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+20)));
-						if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10&&Math.abs(MainMaster.dxCoordinate-position[0])<=2){
+						if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=30.48&&Math.abs(MainMaster.dxCoordinate-position[0])<=2&&MainMaster.role!=PlayerRole.ATTACKER){
 							if(!carryingBeacon){
 								beaconDetected = true;
 								break;
@@ -351,10 +338,7 @@ public class Navigation {
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 90))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(90);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -363,15 +347,17 @@ public class Navigation {
 				}
 				try{Thread.sleep(10);}catch(InterruptedException e){}
 				distanceToObstacle = USFilter.getUS();
-				RConsole.println("Distance to obs. "+distanceToObstacle);
 			
 				if(distanceToObstacle<30.48){
 					if(position[0]>270){
 						//We are near the wall so we don't stop 30.48 from it.
+					}else if(Math.abs(y-(position[1]))<=2&&Math.abs(x-(position[0]+distanceToObstacle+22))<=30.48){
+						searchLocationBlocked = true;
+						break;
 					}else{
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+20)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]))<=2&&Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]))<=2&&Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=30.48&&MainMaster.role!=PlayerRole.ATTACKER){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -388,10 +374,7 @@ public class Navigation {
 			while(Math.abs(position[1]-y)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 180))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(180);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -400,15 +383,17 @@ public class Navigation {
 				}
 				try{Thread.sleep(10);}catch(InterruptedException e){}
 				distanceToObstacle = USFilter.getUS();
-				RConsole.println("Distance to obs. "+distanceToObstacle);
 				
 				if(distanceToObstacle<30.48){
 					if(position[1]<30){
 						//We are near the wall so we don't stop 30.48 from it.
+					}else if(Math.abs(y-(position[1]+distanceToObstacle+22))<=30.48&&Math.abs(x-(position[0]))<=2){
+						searchLocationBlocked = true;
+						break;
 					}else{
 					RConsole.println("Distance to obstacle: "+distanceToObstacle);
 					RConsole.println("Distace to dest."+Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle)));
-					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=10&&Math.abs(MainMaster.dxCoordinate-(position[0]))<=2){
+					if(Math.abs(MainMaster.dyCoordinate-(position[1]+distanceToObstacle+22))<=30.48&&Math.abs(MainMaster.dxCoordinate-(position[0]))<=2&&MainMaster.role!=PlayerRole.ATTACKER){
 						if(!carryingBeacon){
 							beaconDetected = true;
 							break;
@@ -425,10 +410,7 @@ public class Navigation {
 			while(Math.abs(position[0]-x)>DISTANCE_ERROR_WHILE_TRAVELLING){
 				odo.getPosition(position);
 				if(Math.abs(Odometer.minimumAngleFromTo(odo.getTheta(), 270))>=1){
-					RConsole.println("Applying theta correction");
-					RConsole.println("Angle before correcting is: "+odo.getTheta());
 					timer.stop();
-					RConsole.println("Stopped first timer");
 					turnTo(270);
 					timer = new  Timer(10,odoCorrection);
 					timer.start();
@@ -442,10 +424,14 @@ public class Navigation {
 				if(distanceToObstacle<30.48&&(position[0]>30)){
 					if(position[0]>30){
 						//We are near the wall so we don't stop 30.48 from it.
-					}else{
+					}else if(Math.abs(y-(position[1]))<=2&&Math.abs(x-(position[0]+distanceToObstacle+22))<=30.48){
+						searchLocationBlocked = true;
+						break;
+					}
+					else{
 						RConsole.println("Distance to obstacle: "+distanceToObstacle);
 						RConsole.println("Distace to dest."+Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle)));
-						if(Math.abs(MainMaster.dyCoordinate-(position[1]))<=2&&Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=10){
+						if(Math.abs(MainMaster.dyCoordinate-(position[1]))<=2&&Math.abs(MainMaster.dxCoordinate-(position[0]+distanceToObstacle+22))<=30.48&&MainMaster.role!=PlayerRole.ATTACKER){
 							if(!carryingBeacon){
 								beaconDetected = true;
 								break;
@@ -465,14 +451,6 @@ public class Navigation {
 		robot.setForwardSpeed(0);
 
 		if(obstacleDetected){
-			if(Math.abs(position[0]-x)<=30.48 && Math.abs(position[1]-y)<=30.48){
-				if(MainMaster.role == PlayerRole.ATTACKER){
-					searchAlgorithm.markCurrentAttackerLocationBlocked();
-				}else{
-					searchAlgorithm.markCurrentDefenderLocationAsBlocked();
-				}
-			}
-			
 			avoidObstacle();
 		}
 	}
@@ -547,7 +525,7 @@ public class Navigation {
 				TwoWheeledRobot.rightMotor.setSpeed(ROTATION_SPEED);
 			}*/
 		
-			while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
+			
 				RConsole.println("Inside turn to");
 				TwoWheeledRobot.leftMotor.setSpeed(100);
 				TwoWheeledRobot.rightMotor.setSpeed(100);
@@ -555,7 +533,7 @@ public class Navigation {
 				TwoWheeledRobot.leftMotor.rotate(-convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, angleDiff), false);
 				angleDiff = Odometer.minimumAngleFromTo(odo.getTheta(), angle);
 
-			}
+			
 			
 			
 			//Stop the rotation.
@@ -592,213 +570,213 @@ public class Navigation {
 			angleDiff = Odometer.minimumAngleFromTo(currPos[2], destAngle);
 		}*/
 		angleDiff = 5;
-		while(Math.abs(angleDiff)>ROTATION_TOLERANCE){
+	
 			TwoWheeledRobot.leftMotor.setSpeed(100);
 			TwoWheeledRobot.rightMotor.setSpeed(100);
 			TwoWheeledRobot.rightMotor.rotate(convertAngle(TwoWheeledRobot.rightRadius, TwoWheeledRobot.DEFAULT_WIDTH, 360), true);
 			TwoWheeledRobot.leftMotor.rotate(-convertAngle(TwoWheeledRobot.leftRadius, TwoWheeledRobot.DEFAULT_WIDTH, 360), false);
 			angleDiff = Odometer.minimumAngleFromTo(odo.getTheta(), destAngle);
-		}
+		
 		
 		//Stop the rotation
 		robot.setRotationSpeed(0.0);
 	}
 	
 	/**
-	 * This method is going to find an alternative route to pass through an obstacle
+	 * This method is going to find an alternative route to pass through an
+	 * obstacle
 	 */
-	public void avoidObstacle(){
-				
+	public void avoidObstacle() {
+
 		stopGoingStraight();
 		this.travellingDuringObstacleAvoidance = true;
 		int maxSensor = 30;
 		int sensorAverage = 0;
-		double bearing = odo.getTheta();		
+		double bearing = odo.getTheta();
 		int count = 10;
 		double x = odo.getXPos();
 		double y = odo.getYPos();
-		
+
 		// CHECK FIRST IF IT'S A WALL
 		RConsole.println("Success obstacle in front");
 		// Case for wall at the left side
-		if( x < 30 && bearing > 250 && bearing < 290 ){
+		if (x < 30 && bearing > 250 && bearing < 290) {
 			obstacleTravel(15.24);
 			obstacleDetected = false;
 			RConsole.println("Wall left");
-		}else if( x > 275 && bearing > 70 && bearing < 110 ){// Case for wall at the right side
+		} else if (x > 275 && bearing > 70 && bearing < 110) {// Case for wall
+																// at the right
+																// side
 			obstacleTravel(15.24);
 			obstacleDetected = false;
 			RConsole.println("Wall right");
-		}else if( y < 30 && bearing > 160 && bearing < 200 ){// Case for wall at the bottom side
+		} else if (y < 30 && bearing > 160 && bearing < 200) {// Case for wall
+																// at the bottom
+																// side
 			obstacleTravel(15.24);
 			obstacleDetected = false;
 			RConsole.println("Wall bottom");
-		}else if( y > 275 && (bearing > 340 || bearing < 20) ){// Case for wall at the upper side
+		} else if (y > 275 && (bearing > 340 || bearing < 20)) {// Case for wall
+																// at the upper
+																// side
 			obstacleTravel(15.24);
 			obstacleDetected = false;
 			RConsole.println("Wall up");
-		}else{// Case for it's really an obstacle
-		
-		if( bearing > 340 || bearing < 20 ){
-		// Turning to the right and check availability
-		
-		bearing = bearing + 90;		
-		turnTo(bearing);		
-		
-		int i = 0;
-		while( i < count ){
-			
-			sensorAverage = sensorAverage + USFilter.getUS();
-			i++;
-		}
-		sensorAverage = sensorAverage/count;
-		RConsole.println("Success to turn right");
-		if( sensorAverage > maxSensor ){
-			// Go straight if there is no obstacle			
-			RConsole.println("No obstacle at right");
-			obstacleTravel(30.48);
-			
-			// Turn to the left 			
-			bearing = bearing - 90;			
-			turnTo(bearing);			
-			
-			
-			
-		}
-		else{
-		// Right is occupied
-		// Turning to the left and check availability		
-			RConsole.println("Obstacle at right");
-		bearing = bearing - 180;		
-		turnTo(bearing);	
-			
-		i = 0;
-		sensorAverage = 0;
-		while( i < count ){
-				
-			sensorAverage = sensorAverage + USFilter.getUS();;
-			i++;	
-		}
-		sensorAverage = sensorAverage/count;
-		
-		if( sensorAverage > maxSensor ){		
-			// Go straight if there is no obstacle
-			
-			
-			obstacleTravel(30.48);
-					
-			// Turn to the right			
-			bearing = bearing + 90;			
-			turnTo(bearing);
-			
-			
-			
-		}else{
-			// Left is occupied
-			// Turning left to face backward		
-			bearing = bearing - 90;		
-			turnTo(bearing);
-			RConsole.println("Turn backward");
-		}
-			
-		}
-		
-		}else{
-			
-			RConsole.println("Success to turn left");
-			// Turning to the left and check availability			
-			bearing = bearing - 90;		
-			turnTo(bearing);		
-			
-			int i = 0;
-			while( i < count ){
-				
-				sensorAverage = sensorAverage + USFilter.getUS();;
-				i++;
-			}
-			sensorAverage = sensorAverage/count;
-			
-			if( sensorAverage > maxSensor ){
-				// Go straight if there is no obstacle			
-				RConsole.println("Success to go left");
-				obstacleTravel(30.48);
-				
-				// Turn to the right 			
-				bearing = bearing + 90;			
-				turnTo(bearing);			
-				
-				
-				
-			}
-			else{
-			// Left is occupied
-			// Turning to the right and check availability		
-				RConsole.println("Obstacle left");
-			bearing = bearing + 180;		
-			turnTo(bearing);	
-				
-			i = 0;
-			sensorAverage = 0;
-			while( i < count ){
-					
-				sensorAverage = sensorAverage + USFilter.getUS();
-				i++;	
-			}
-			sensorAverage = sensorAverage/count;
-			
-			if( sensorAverage > maxSensor ){		
-				// Go straight if there is no obstacle				
-				obstacleTravel(30.48);
-						
-				// Turn to the left			
-				bearing = bearing - 90;			
+		} else {// Case for it's really an obstacle
+
+			if (bearing > 340 || bearing < 20) {
+				// Turning to the right and check availability
+
+				bearing = bearing + 90;
 				turnTo(bearing);
-				
-				
-				
-			}else{
-				// Left is occupied
-				// Turning right to face backward		
-				bearing = bearing + 90;		
+
+				int i = 0;
+				while (i < count) {
+
+					sensorAverage = sensorAverage + USFilter.getUS();
+					i++;
+				}
+				sensorAverage = sensorAverage / count;
+				RConsole.println("Success to turn right");
+				if (sensorAverage > maxSensor) {
+					// Go straight if there is no obstacle
+					RConsole.println("No obstacle at right");
+					obstacleTravel(30.48);
+
+					// Turn to the left
+					bearing = bearing - 90;
+					turnTo(bearing);
+
+				} else {
+					// Right is occupied
+					// Turning to the left and check availability
+					RConsole.println("Obstacle at right");
+					bearing = bearing - 180;
+					turnTo(bearing);
+
+					i = 0;
+					sensorAverage = 0;
+					while (i < count) {
+
+						sensorAverage = sensorAverage + USFilter.getUS();
+						i++;
+					}
+					sensorAverage = sensorAverage / count;
+
+					if (sensorAverage > maxSensor) {
+						// Go straight if there is no obstacle
+
+						obstacleTravel(30.48);
+
+						// Turn to the right
+						bearing = bearing + 90;
+						turnTo(bearing);
+
+					} else {
+						// Left is occupied
+						// Turning left to face backward
+						bearing = bearing - 90;
+						turnTo(bearing);
+						RConsole.println("Turn backward");
+					}
+
+				}
+
+			} else {
+
+				RConsole.println("Success to turn left");
+				// Turning to the left and check availability
+				bearing = bearing - 90;
 				turnTo(bearing);
-				RConsole.println("Turn backward");
+
+				int i = 0;
+				while (i < count) {
+
+					sensorAverage = sensorAverage + USFilter.getUS();
+					i++;
+				}
+				sensorAverage = sensorAverage / count;
+
+				if (sensorAverage > maxSensor) {
+					// Go straight if there is no obstacle
+					RConsole.println("Success to go left");
+					obstacleTravel(30.48);
+
+					// Turn to the right
+					bearing = bearing + 90;
+					turnTo(bearing);
+
+				} else {
+					// Left is occupied
+					// Turning to the right and check availability
+					RConsole.println("Obstacle left");
+					bearing = bearing + 180;
+					turnTo(bearing);
+
+					i = 0;
+					sensorAverage = 0;
+					while (i < count) {
+
+						sensorAverage = sensorAverage + USFilter.getUS();
+						i++;
+					}
+					sensorAverage = sensorAverage / count;
+
+					if (sensorAverage > maxSensor) {
+						// Go straight if there is no obstacle
+						obstacleTravel(30.48);
+
+						// Turn to the left
+						bearing = bearing - 90;
+						turnTo(bearing);
+
+					} else {
+						// Left is occupied
+						// Turning right to face backward
+						bearing = bearing + 90;
+						turnTo(bearing);
+						RConsole.println("Turn backward");
+					}
+
+				}
+
 			}
-				
-			}
-			
-		}
-		
+
 		}
 		this.travellingDuringObstacleAvoidance = false;
 	}
-	
+
 	/**
-	 * This method is going to move the robot forward according to the distance(Used primarily for obstacle avoider)
+	 * This method is going to move the robot forward according to the
+	 * distance(Used primarily for obstacle avoider)
+	 * 
 	 * @param distance
 	 */
-	private void obstacleTravel(double distance){
-		
-double bearing = odo.getTheta();
-		
+	private void obstacleTravel(double distance) {
+
+		double bearing = odo.getTheta();
+
 		// Positive y
-		if( bearing < 20 || bearing > 340 ){
+		if (bearing < 20 || bearing > 340) {
 			travelToInXandY(odo.getXPos(), odo.getYPos() + distance);
-			
-		// Positive x
-		}else{if( bearing > 70 && bearing < 110 ){
-			travelToInXandY(odo.getXPos() + distance, odo.getYPos());
-			
-		// Negative y	
-		}else{if( bearing > 160 && bearing < 200 ){
-			travelToInXandY(odo.getXPos(), odo.getYPos() - distance);
-			
-		// Negative x	
-		}else{
-			travelToInXandY(odo.getXPos() - distance, odo.getYPos());	
-		}			
-		}			
+
+			// Positive x
+		} else {
+			if (bearing > 70 && bearing < 110) {
+				travelToInXandY(odo.getXPos() + distance, odo.getYPos());
+
+				// Negative y
+			} else {
+				if (bearing > 160 && bearing < 200) {
+					travelToInXandY(odo.getXPos(), odo.getYPos() - distance);
+
+					// Negative x
+				} else {
+					travelToInXandY(odo.getXPos() - distance, odo.getYPos());
+				}
+			}
 		}
-		
+
 	}
 
 	/**

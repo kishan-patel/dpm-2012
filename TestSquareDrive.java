@@ -37,23 +37,23 @@ public class TestSquareDrive {
 		/*try{Thread.sleep(1000);}catch (Exception e) {
 			// TODO: handle exception
 		}*/
-		/*
-		nav.travelToInXandY(0,60);
-		//nav.turn360();
-		try{Thread.sleep(2000);}catch(InterruptedException e){}
-		
-		nav.travelToInXandY(60,60);
-		//nav.turn360();
-		try{Thread.sleep(2000);}catch(InterruptedException e){}
 		
 		nav.travelToInXandY(60,0);
 		//nav.turn360();
-		try{Thread.sleep(2000);}catch(InterruptedException e){}
+		//try{Thread.sleep(2000);}catch(InterruptedException e){}
+		
+		nav.travelToInXandY(60,60);
+		//nav.turn360();
+		//try{Thread.sleep(2000);}catch(InterruptedException e){}
+		
+		nav.travelToInXandY(0,60);
+		//nav.turn360();
+		//try{Thread.sleep(2000);}catch(InterruptedException e){}
 		
 		nav.travelToInXandY(0,0);
-		*/
+		
 		//nav.turn360();
-		try{Thread.sleep(2000);}catch(InterruptedException e){}
+		//try{Thread.sleep(2000);}catch(InterruptedException e){}
 		
 		/*nav.turn360();
 		
