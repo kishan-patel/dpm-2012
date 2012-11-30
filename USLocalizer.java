@@ -10,7 +10,7 @@ public class USLocalizer {
 	public static double ROTATION_SPEED = 20;
 	/**Value used for the rising_edge.*/
 	public static int TRESH_HOLD = 7;
-	/**Specifies the distance to the wall the confirms it has been detected.*/
+	/**Specifies the distance to the wall that confirms it has been detected.*/
 	public static int WALL_DIST = 40;
 	/**The noise margin.*/
 	public static int NOISE = 1;

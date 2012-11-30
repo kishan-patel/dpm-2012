@@ -24,6 +24,8 @@ public class MainMaster {
 	public static int ax=1, ay=1;
 	public static double dxCoordinate = (dx*30.48)-(30.48/2);
 	public static double dyCoordinate = (dy*30.48)-(30.48/2);
+	public static double axCoordinate = (ax*30.48)-(30.48/2);
+	public static double ayCoordinate = (ay*30.48)-(30.48/2);
 	
 	//Variables used for communication with slave.
 	private static NXTConnection connectionToSlave;
@@ -51,7 +53,7 @@ public class MainMaster {
 	public static void main(String[] args){
 		connectToBTServer();
 		connectToSlave();
-		RConsole.openBluetooth(10000);
+		//RConsole.openBluetooth(10000);
 		LCD.clear();
 		
 		if(role == PlayerRole.DEFENDER){
@@ -67,18 +69,19 @@ public class MainMaster {
 			ll.doLocalization();
 			Constants.LEFT_LIGHT_THRESHOLD = 500;
 			nav.travelTo(0,0);
-			nav.travelTo(15.24, 15.24);
+			//nav.travelTo(15.24, 15.24);
 			//nav.travelToInXandY(15.24, 90);
 			//Go to the beacon and stop at the optimal position.
 			beaconFound = false;
 			goToBeacon();
 			if(beaconFound){
 				pickupBeacon();
-				nav.turnTo(odo.getTheta()+23);
+				nav.turnTo(odo.getTheta()+20);
 				nav.carryingBeacon = true;
 				hideBeacon();
 				dropBeacon();
 				nav.carryingBeacon = false;
+				nav.travelToInXandY(0, 0);
 			}
 		}else if (role == PlayerRole.ATTACKER){
 			//Attacker code
@@ -88,7 +91,6 @@ public class MainMaster {
 			
 			//Perform localization prior to going to the beacon.
 			usl.doLocalization();
-			try{Thread.sleep(2000);}catch(InterruptedException e){}
 			ll.doLocalization();
 			Constants.LEFT_LIGHT_THRESHOLD = 500;
 			nav.travelTo(0,0);
@@ -97,10 +99,11 @@ public class MainMaster {
 			findAndGoToBeacon();
 			if(beaconFound){
 				pickupBeacon();
-				nav.turnTo(odo.getTheta()+23);
-				nav.travelToInXandY(ax, ay);
+				nav.turnTo(odo.getTheta()+20);
+				nav.travelToInXandY(axCoordinate, ayCoordinate);
 				dropBeacon();
 			}
+			nav.travelToInXandY(0, 0);
 		}		
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
@@ -192,7 +195,7 @@ public class MainMaster {
 	
 	public static void hideBeacon(){
 		RConsole.println("Found beacon and travelling to 0,0");
-		nav.travelToInXandY(0,0);
+		nav.travelToInXandY(150,150);
 	}
 	
 	public static void findAndGoToBeacon(){
@@ -220,8 +223,8 @@ public class MainMaster {
 		fieldScanner.turnToBeacon();
 		nav.navigateTowardsLightSource(18);
 		nav.turnTo(odo.getTheta() - 180);
-		nav.turnTo(odo.getTheta() - 23);
-		nav.goStraight(12);
+		nav.turnTo(odo.getTheta() - 20);
+		nav.goStraight(15);
 	}
 	
 	public static void pickupBeacon() {

@@ -17,7 +17,7 @@ public class Navigation {
 	private final static int FWD_SPEED = 5;
 	
 	/**This number specifies how frequently correction should be done while traveling towards the light source.*/
-	private final static int UPDATE_HEADING_PERIOD = 3000;
+	private final static int UPDATE_HEADING_PERIOD = 5000;
 	
 	/**The rotation speed.*/
 	private int ROTATION_SPEED = 20;

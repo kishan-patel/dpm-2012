@@ -4,15 +4,29 @@ import lejos.nxt.comm.RConsole;
 public class SearchAlgorithm {
 	private static SearchAlgorithm searchAlgorithm = null;
 	//private final double[][] attackerSearchBox = {{0.0,0.0},{30.0,0.0},{60.0,0.0},{90.0,0.0},{90.0,30.0},{90.0,60.0},{90.0,90},{60.0,90.0},{30.0,90.0},{0,90.0},{0.0,0.0}};
-	private final double[][] attackerSearchBox = {{30.48,30.48},
-			{152.4,30.48},
-			{274.32,30.48},
-			{274.32,152.4},
-			{152.4,152.4},
-			{30.48,152.4},
+	private final double[][] attackerSearchBox = {
+			{30.48, 91.44},
+			{30.48, 213.36},
+			{152.4, 274.32},
+			{213.36,274.32},
+			{213.36,91.44},
+			{152.4, 91.44},
+			
+			{30.48,30.48},
 			{30.48,274.32},
-			{152.4,274.32},
-			{274.32,274.32}};
+			{274.32,274.32},
+			{274.32,30.48},
+			/*
+			{213.36, 152.4},
+			{152.4, 213.36},
+			{30.48,152.4},
+			{152.4,274.32}, 
+			{274.32,152.4},
+			{152.4,30.48},
+			{152.4,152.4},
+			*/
+			
+	};
 	private double[][] defenderSearchBox;/* = {{15.24,15.24},{45.72,15.24},{76.2,15.24},{76.2,45.72},{76.2,76.2},{45.72,76.2},{15.24,76.2},{15.24,45.72}};*/
 	private int currentAttackerIndex = 0;
 	private int nextAttackerIndex = 0;
@@ -58,19 +72,19 @@ public class SearchAlgorithm {
 	}
 	
 	public void setDefenderLocation(int tileX, int tileY){
-		double xCoord = (30.48*tileX)-(30.48/2);
-		double yCoord = (30.48*tileY)-(30.48/2);
+		double xCoord = (30.48*tileX);
+		double yCoord = (30.48*tileY);
 		
 		defenderSearchBox = new double[][]
 				{
-					{xCoord-30.48, yCoord-30.48},
-					{xCoord, yCoord-30.48},
-					{xCoord+30.48, yCoord-30.48},
-					{xCoord+30.48, yCoord},
-					{xCoord+30.48, yCoord+30.48},
-					{xCoord, yCoord+30.48},
-					{xCoord-30.48, yCoord+30.48},
-					{xCoord-30.48, yCoord},
+					/*{xCoord-30.48, yCoord-30.48},*/
+					{xCoord, yCoord-(30.48+22)},
+					/*{xCoord+30.48, yCoord-30.48},*/
+					{xCoord+(30.48+22), yCoord},
+					/*{xCoord+30.48, yCoord+30.48},*/
+					{xCoord, yCoord+(30.48+22)},
+					/*{xCoord-30.48, yCoord+30.48},*/
+					{xCoord-(30.48+22), yCoord},
 				};
 	}
 	
